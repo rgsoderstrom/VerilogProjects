@@ -1,0 +1,16 @@
+Mercury
+Mercury2
+*.pdf
+.Xil
+*.jpg
+*.log
+*.jou
+*.wcfg
+*.cache
+*.hw
+*.ip_user_files
+*.runs
+*.sim
+ip
+
+

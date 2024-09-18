@@ -1,0 +1,87 @@
+`timescale 1ns / 1ps
+
+//
+// MotorsAndEncoders - top module
+//
+
+module MotorsAndEncoders (input  Enc1X,  // encoder 1, front caster
+                          input  Enc1Y,
+                          input  Enc1Z,
+                          input  Enc2X,  // encoder 2
+                          input  Enc2Y,
+                          input  Enc2Z,
+                          input  Enc3X,  // encoder 3, rear drive wheel
+                          input  Enc3Y,
+                          input  Enc4X,  // encoder 4
+                          input  Enc4Y,
+                          output PWM1Out,
+                          output PWM2Out,
+                          output DataOut,  // 1 bit, to Arduino
+                          input  DataIn,   // 1 bit, from Arduino
+                          output triggerInterrupt, // 1 bit, to Arduino interrupt
+                          input  SampleEnc,
+                          input  ShiftOut,
+                          input  LoadPWM,
+                          input  ShiftIn,
+                          //input  Clr,       // active high
+                          input  clk); //CLK12MHZ);
+                      //    output CLK12MHZ);
+                                                    
+    assign Clr = 0;                          
+                          
+    wire SSampleEnc;
+    wire SShiftOut;
+    wire SLoadPWM;
+    wire SShiftIn;
+    wire [3:0] Motor1Speed;
+    wire [3:0] Motor2Speed;
+    
+    wire CLK12MHZ;
+    
+    wire Encoder3Half, Encoder4Half;
+    
+    ClockDivider
+        ClkDiv (.FastClock (clk), .Clear (Clr), .SlowClock (CLK12MHZ));
+        
+    SyncOneShot 
+        SyncOS1 (.trigger (SampleEnc), .clk (CLK12MHZ), .clr (Clr), .Q (SSampleEnc)),
+        SyncOS2 (.trigger (ShiftOut),  .clk (CLK12MHZ), .clr (Clr), .Q (SShiftOut)),
+        SyncOS3 (.trigger (LoadPWM),   .clk (CLK12MHZ), .clr (Clr), .Q (SLoadPWM)),
+        SyncOS4 (.trigger (ShiftIn),   .clk (CLK12MHZ), .clr (Clr), .Q (SShiftIn));
+
+    PWM
+        PWM1 (.CLK12MHZ (CLK12MHZ), .Clr (Clr), .Load (SLoadPWM), .Level (Motor1Speed), .AtLevel (PWM1Done), .PWM (PWM1Out)),
+        PWM2 (.CLK12MHZ (CLK12MHZ), .Clr (Clr), .Load (SLoadPWM), .Level (Motor2Speed), .AtLevel (PWM2Done), .PWM (PWM2Out)); 
+
+    wire [12:0] Enc1Count;
+    wire [12:0] Enc2Count;
+    wire [9:0] Enc3Count;
+    wire [9:0] Enc4Count;
+    
+	assign ClearEnc1  = Enc1Z | Clr;
+	assign ClearEnc2  = Enc2Z | Clr;
+    assign ClearEnc34 = SSampleEnc | Clr;
+    
+    wire unused1, unused2;
+    
+    ShaftEncoderIF #(.Width (13))
+        SE1 (.PhaseA (Enc1X), .PhaseB (Enc1Y), .Half (unused1), .CLK12MHZ (CLK12MHZ), .ClearCounter (ClearEnc1),  .ClearDetector (Clr), .Count (Enc1Count)),
+        SE2 (.PhaseA (Enc2X), .PhaseB (Enc2Y), .Half (unused2), .CLK12MHZ (CLK12MHZ), .ClearCounter (ClearEnc2),  .ClearDetector (Clr), .Count (Enc2Count));
+	
+    ShaftEncoderIF #(.Width (10))		
+        SE3 (.PhaseA (Enc3X), .PhaseB (Enc3Y), .Half (Encoder3Half), .CLK12MHZ (CLK12MHZ), .ClearCounter (ClearEnc34), .ClearDetector (Clr), .Count (Enc3Count)),
+        SE4 (.PhaseA (Enc4X), .PhaseB (Enc4Y), .Half (Encoder4Half), .CLK12MHZ (CLK12MHZ), .ClearCounter (ClearEnc34), .ClearDetector (Clr), .Count (Enc4Count));
+        
+    InterruptCtrl
+        interupt (.in1 (Encoder3Half), .in2 (Encoder4Half), .in3 (PWM1Done), .in4 (PWM2Done), .clearInterrupt (SSampleEnc), 
+                  .Clr (Clr), .Clk (CLK12MHZ), .interrupt (triggerInterrupt));
+    
+    SerializerPtoS #(.Width1 (13), .Width2 (13), .Width3 (10), .Width4 (10))
+        ser1 (.Input1 (Enc1Count), .Input2 (Enc2Count), .Input3 (Enc3Count), .Input4 (Enc4Count), .Input5 (PWM1Done), .Input6 (PWM2Done),
+              .Clr (Clr), .Clk (CLK12MHZ),
+              .Load (SSampleEnc), .Shift (SShiftOut), .OutputBit (DataOut));
+                                              
+    SerializerStoP
+        ser2 (.DataIn (DataIn), .Shift (SShiftIn), .Clr (Clr), .Clk (CLK12MHZ), .Q1 (Motor1Speed), .Q2 (Motor2Speed));                            
+
+endmodule
