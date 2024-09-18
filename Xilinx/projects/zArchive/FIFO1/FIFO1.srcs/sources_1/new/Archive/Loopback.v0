@@ -1,0 +1,83 @@
+
+`timescale 1ns / 1ps
+
+/*
+	Loopback.v - top level for FIFO loopback test
+*/
+
+module Loopback (input  InputDataBit, // 
+                 input  InputShiftClock,
+                 input  InputDone,
+                 
+                 output OutputDataBit,
+                 input  OutputShiftClock,
+                 output LastBit,
+                 output FirstBit,
+                 
+                 input  Clk,
+                 input  Clear);
+
+    localparam DataWidth = 8;
+    
+    wire [DataWidth - 1 : 0] InputDataWord;  // S2P -> FIFO Data In
+    wire [DataWidth - 1 : 0] OutputDataWord; // FIFO Data Out -> P2S
+    
+    wire InputReady;
+    wire P2S_Empty;
+    wire P2S_Load;
+    
+    wire FIFO_Empty;
+    wire FIFO_ShiftOut;
+    
+    wire SInputShiftClk;
+    wire SOutputShiftClk;
+    wire SInputDone;
+    
+    FIFO1 #(.DataWidth (DataWidth), .AddrWidth (4))           
+       fifo (.Clk (Clk),          
+             .Clr (Clear),
+             .Empty (FIFO_Empty), 
+             .Full (),
+             .InputData (InputDataWord), 
+             .OutputData (OutputDataWord),
+             .ShiftIn (InputReady),      
+             .ShiftOut (FIFO_ShiftOut)); 
+
+    SyncOneShot 
+        sync1 (.trigger (InputShiftClock),  .clk (Clk), .clr (Clear), .Q (SInputShiftClk)),
+        sync2 (.trigger (InputDone),        .clk (Clk), .clr (Clear), .Q (SInputDone)),
+        sync3 (.trigger (OutputShiftClock), .clk (Clk), .clr (Clear), .Q (SOutputShiftClk));
+                 
+    SerializerStoP #(.Width (DataWidth)) 
+        s2P (.DataIn (InputDataBit),
+             .Shift (SInputShiftClk),
+             .Done (SInputDone),  // data source sets this true when antire word has been shifted in
+             .Clr (Clear),        // sync, active high
+             .Clk (Clk),          // pos edge trigger
+             .Ready (InputReady), // copy of "Done" input
+             .DataOut (InputDataWord));
+                 
+    SerializerPtoS #(.Width (DataWidth))
+        p2S (.Input (OutputDataWord),
+             .Clr (Clear),   // sync, active high
+             .Clk (Clk),   // pos edge triggered
+             .Empty (P2S_Empty),
+             .Load (P2S_Load),
+             .Shift (SOutputShiftClk),
+			 .FirstBit (FirstBit),  // true when OutputBit is first bit of Input
+			 .LastBit (LastBit),   //  "     "      "     "  last   "   "   "						
+             .OutputBit (OutputDataBit));
+
+    FifoController
+        ctrl (.P2S_Ready (P2S_Empty),
+   		      .P2S_Load (P2S_Load),
+			  .Clk (Clk),
+			  .Clear (Clear),
+		      .FIFO_Empty (FIFO_Empty),
+			  .FIFO_ShiftOut (FIFO_ShiftOut));
+                 
+endmodule
+                 
+                 
+
+

@@ -1,0 +1,63 @@
+
+`timescale 1ns / 1ps
+
+/*
+	Loopback.v - top level for FIFO loopback test
+*/
+
+// S2P and synchronous one-shots removed
+
+module Loopback (input  [7 : 0] InputDataWord, // 
+                 input  LoadInput,
+                 
+                 output OutputDataBit,
+                 input  OutputShiftClock,
+                 output LastBit,
+                 output FirstBit,
+                 
+                 input  Clk,
+                 input  Clear);
+
+    localparam DataWidth = 8;
+    
+    wire [DataWidth - 1 : 0] OutputDataWord; // FIFO Data Out -> P2S
+    
+    wire P2S_Empty;
+    wire P2S_Load;
+    
+    wire FIFO_Empty;
+    wire FIFO_ShiftOut;
+    
+    FIFO1 #(.DataWidth (DataWidth), .AddrWidth (4))           
+       fifo (.Clk (Clk),          
+             .Clr (Clear),
+             .Empty (FIFO_Empty), 
+             .Full (),
+             .InputData (InputDataWord), 
+             .OutputData (OutputDataWord),
+             .ShiftIn (LoadInput),      
+             .ShiftOut (FIFO_ShiftOut)); 
+
+    SerializerPtoS #(.Width (DataWidth))
+        p2S (.Input (OutputDataWord),
+             .Clr (Clear),   // sync, active high
+             .Clk (Clk),   // pos edge triggered
+             .Empty (P2S_Empty),
+             .Load (P2S_Load),
+             .Shift (OutputShiftClock),
+			 .FirstBit (FirstBit),  // true when OutputBit is first bit of Input
+			 .LastBit (LastBit),   //  "     "      "     "  last   "   "   "						
+             .OutputBit (OutputDataBit));
+
+    FifoController
+        ctrl (.P2S_Ready (P2S_Empty),
+   		      .P2S_Load (P2S_Load),
+			  .Clk (Clk),
+			  .Clear (Clear),
+		      .FIFO_Empty (FIFO_Empty),
+			  .FIFO_ShiftOut (FIFO_ShiftOut));                 
+endmodule
+                 
+                 
+
+
