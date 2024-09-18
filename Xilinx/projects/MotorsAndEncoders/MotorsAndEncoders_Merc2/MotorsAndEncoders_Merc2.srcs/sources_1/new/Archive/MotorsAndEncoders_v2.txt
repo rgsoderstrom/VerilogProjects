@@ -1,0 +1,169 @@
+
+//
+// MotorsAndEncoders - top module, loads profiles into SingleMotorControllers
+//
+
+`timescale 1ns / 1ps
+
+module MotorsAndEncoders (input  RunCmnd,   // 1 bit, from Arduino
+                          input  StopCmnd,
+                          input  LoadCmnd,
+                          input  ClearCmnd,
+                          
+                          output PWM1,
+                          output Dir1,
+                          output PWM2,
+                          output Dir2,
+                          
+                          output Done,  // 1 bit, to Arduino
+                          output P10,   // 10Hz pulses out to scope, for initial tests
+                          
+                          input  ClearBar,   // active low
+                          input  FastClock); // Merc 2's 50MHz clock;
+
+    localparam SW = 8; // speed width
+    localparam DW = 8; // duration width
+    
+    wire Clock12MHz,  Pulse10Hz;
+    
+    //reg  Clear;
+    wire Clear;
+    
+    
+    wire SRun, SClear, SStop, SLoad;
+    reg  LoadSegment;
+
+    wire SPWMLoad1, SPWMDone1, SPWMLoad2, SPWMDone2, Done1, Done2;
+    wire [SW-1:0] SPWMLevel1;
+    wire [SW-1:0] SPWMLevel2;
+    
+    //assign P10 = Pulse10Hz;
+    assign Done = Done1 & Done2;
+    assign Clear = ~ClearBar;
+
+    reg [SW-1:0] Motor1Speeds    [0:4];
+    reg [DW-1:0] Motor1Durations [0:4];
+    reg [SW-1:0] Motor2Speeds    [0:4];
+    reg [DW-1:0] Motor2Durations [0:4];
+    reg [4:0]    Count;
+    reg [4:0]    Get = 0;
+    
+    initial 
+    begin
+        Motor1Speeds [0] =  8'd100;
+        Motor1Speeds [1] =  8'd127;
+        Motor1Speeds [2] = -8'd80;
+        
+        Motor2Speeds [0] = -8'd80; 
+        Motor2Speeds [1] = -8'd127;
+        Motor2Speeds [2] =  8'd100;
+
+        Motor1Durations [0] = 8'd100; // tenths of a second
+        Motor1Durations [1] = 8'd180;
+        Motor1Durations [2] = 8'd120;
+        
+        Motor2Durations [0] = 8'd120;
+        Motor2Durations [1] = 8'd180;
+        Motor2Durations [2] = 8'd100;
+                        
+        Count = 3;
+    end        
+            
+            
+    ClockDivider #(.Divisor (4))
+        ClkDiv1 (.FastClock (FastClock), .Clear (Clear), .SlowClock (Clock12MHz), .Pulse ());
+        
+    ClockDivider #(.Divisor (1250000))
+        ClkDiv2 (.FastClock (Clock12MHz), .Clear (Clear), .SlowClock (P10), .Pulse (Pulse10Hz));
+                
+    SyncOneShot 
+        SyncOS1 (.trigger (ClearCmnd), .clk (Clock12MHz), .clr (Clear), .Q (SClear)),
+        SyncOS2 (.trigger (StopCmnd),  .clk (Clock12MHz), .clr (Clear), .Q (SStop)),
+        SyncOS3 (.trigger (LoadCmnd),  .clk (Clock12MHz), .clr (Clear), .Q (SLoad)),
+        SyncOS4 (.trigger (RunCmnd),   .clk (Clock12MHz), .clr (Clear), .Q (SRun));
+
+    SingleMotorController #(.SpeedWidth (SW), .DurationWidth (DW))
+                     SMC1 (.SpeedIn    (Motor1Speeds    [Get]),
+                           .DurationIn (Motor1Durations [Get]),
+                           .LoadSegment (LoadSegment),
+                           .ClearProfile (SClear),
+                           .RunProfile (SRun),
+                           .StopProfile (SStop),
+                           .ProfileDone (Done1),
+                           .PwmLoad (SPWMLoad1),
+                           .PwmLevel (SPWMLevel1),
+                           .PwmDone (SPWMDone1),
+                           .Clear (Clear), // active high
+                           .Pulse10Hz (Pulse10Hz),
+                           .Clock12MHz (Clock12MHz)),
+    
+                     SMC2 (.SpeedIn    (Motor2Speeds    [Get]),
+                           .DurationIn (Motor2Durations [Get]),
+                           .LoadSegment (LoadSegment),
+                           .ClearProfile (SClear),
+                           .RunProfile (SRun),
+                           .StopProfile (SStop),
+                           .ProfileDone (Done2),
+                           .PwmLoad (SPWMLoad2),
+                           .PwmLevel (SPWMLevel2),
+                           .PwmDone (SPWMDone2),
+                           .Clear (Clear), // active high
+                           .Pulse10Hz (Pulse10Hz),
+                           .Clock12MHz (Clock12MHz));
+
+        SignedPWM 
+            SPWM1 (.SignedLevel (SPWMLevel1),
+                   .Load (SPWMLoad1),
+                   .Clk (Clock12MHz),
+                   .Clr (Clear),
+                   .PulseTrain (PWM1),
+                   .MotorDirection (Dir1),
+                   .AtCommandedLevel (SPWMDone1)),
+
+            SPWM2 (.SignedLevel (SPWMLevel2),
+                   .Load (SPWMLoad2),
+                   .Clk (Clock12MHz),
+                   .Clr (Clear),
+                   .PulseTrain (PWM2),
+                   .MotorDirection (Dir2),
+                   .AtCommandedLevel (SPWMDone2));
+                
+                
+                
+    //always @ (*)                
+       // Clear = ~ClearBar;                
+                
+//**********************************************************************************
+        
+    reg [3:0] state;
+    
+    initial
+        state = 0;
+        
+    always @ (posedge Clock12MHz)
+        begin
+            if (Clear == 1'b1)
+                    state = 0;
+              
+            else
+                begin
+                    case (state)
+                        0:  if (SLoad == 1) state = 1;
+                        1:  begin Get = 0; state = 2; end
+                        2:  if (Get == Count) state = 0; else state = 3;
+                        3:  state = 4;
+                        4:  begin Get = Get + 1; state = 2; end
+                        
+                        default: state = 0;
+                    endcase
+                end
+        end
+
+    //************************************************************************
+            
+    always @ (*)
+        begin
+            LoadSegment <= (state == 3);                       
+        end
+
+endmodule

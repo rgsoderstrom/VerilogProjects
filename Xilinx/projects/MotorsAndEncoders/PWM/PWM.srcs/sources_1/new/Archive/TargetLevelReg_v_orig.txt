@@ -1,0 +1,20 @@
+`timescale 1ns / 1ps
+
+module TargetLevelReg #(parameter InputWidth  = 4,
+                        parameter OutputWidth = 4)  
+                       (input  Clk,
+                        input  Clr,
+                        input  Load,
+                        input  [InputWidth-1:0]  LowResLevel,
+                        output reg [OutputWidth-1:0] HighResLevel);
+                       
+    always @ (posedge Clk)     
+    begin                  
+        if (Clr == 1'b1)
+            HighResLevel = 0;
+        
+        else if (Load == 1'b1)
+            HighResLevel = LowResLevel << (OutputWidth - InputWidth);
+    end
+                               
+endmodule

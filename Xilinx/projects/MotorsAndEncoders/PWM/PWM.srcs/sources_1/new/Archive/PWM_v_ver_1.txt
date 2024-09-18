@@ -1,0 +1,51 @@
+/*
+    PWM, Ver. 1
+		- same functionality as Ver. 0
+			- pulse width modulator. 
+			- Magnitude only
+*/
+
+`timescale 1ns / 1ps
+
+module PWM #(parameter Width = 7,
+                       FreeCounter_Width = 18)
+            (input Clk12MHz,
+             input Clr,
+             input PWMLoad,
+             input [Width-1:0] Level, // unsigned   
+             output AtLevel,          // PWM is at requested level
+             output PWM);
+
+localparam N = Width; // just a shorter alias
+
+wire [N-1:0] LSBs;
+wire [N-1:0] ONTime;
+
+// EnableUD - goes high when free running counter overflows. This lets
+// the current "on-time" counter incr or decr if necessary
+wire EnableUD; 
+ 
+wire up, down;
+wire [N-1:0] level;
+
+wire less, equal;
+
+assign PWM = less;
+
+Comparator #(.Width (N))
+    U2 (.A (LSBs), .B (ONTime), .Greater (), .Less (less), .Equal (equal));
+
+FreeCounter #(.CounterWidth (FreeCounter_Width), .OutputWidth (N)) 
+    U1 (.Clk (Clk12MHz), .Clr (Clr), .Overflow (EnableUD), .LSBs (LSBs));
+            
+UpDownCounter #(.Width (N)) 
+    U3 (.Clk (Clk12MHz), .Clr (Clr), .Enable (EnableUD), .Count (ONTime), .Up (up), .Down (down),
+        .Load (), .Preset ());
+
+Comparator #(.Width (N))
+    U4 (.A (level), .B (ONTime), .Greater (up), .Less (down), .Equal (AtLevel));       
+           
+TargetLevelReg #(.Width (N)) 
+    U5 (.Clk (Clk12MHz), .Clr (Clr), .Load (PWMLoad), .InputLevel (Level), .OutputLevel (level));
+        
+endmodule

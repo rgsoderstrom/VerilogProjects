@@ -1,0 +1,8 @@
+34  // sync low
+12  // sync high
+65  // ID low
+00  // ID high
+08  // byte count low
+00  // byte count high
+ce  // seq number low
+ab  // seq number high
