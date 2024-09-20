@@ -1,5 +1,5 @@
 /*
-    PowerOnReset.v - provide a single pulse one second after power-up or ClearBar
+    PowerOnReset.v - provide a single pulse after power-up or ClearBar
 */
 
 `timescale 1ns / 1ps
