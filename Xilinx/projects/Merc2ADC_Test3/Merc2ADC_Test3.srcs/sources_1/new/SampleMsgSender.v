@@ -148,7 +148,8 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
     
     reg [5:0] state = Idle;
     
-    assign AllSent = (NumbRemaining == 0) && (state == Idle);             
+    assign AllSent = (NumbRemaining == 0) && (Ready == 1) && (state == Idle);             
+//    assign AllSent = (NumbRemaining == 0) && (state == Idle);             
 
     always @ (posedge Clock50MHz)
     begin

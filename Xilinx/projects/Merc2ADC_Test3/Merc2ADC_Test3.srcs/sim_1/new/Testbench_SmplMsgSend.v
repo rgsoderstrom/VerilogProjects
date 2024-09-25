@@ -116,7 +116,7 @@ module Testbench_SmplMsgSend;
     begin
 	   // write samples into RAM
 	   #100 
-	       for (SampleWriteCount=0; SampleWriteCount<48; SampleWriteCount=SampleWriteCount+1)
+	       for (SampleWriteCount=0; SampleWriteCount<28; SampleWriteCount=SampleWriteCount+1)
 	       begin
 	         #30 SampleWrite <= 1;
 	         #20 SampleWrite <= 0;
@@ -132,11 +132,11 @@ module Testbench_SmplMsgSend;
 		#14000 LoadAndSend <= 1;
         #20   LoadAndSend <= 0;
 		 
-//		#14000 LoadAndSend <= 1;
-//        #20   LoadAndSend <= 0;
+		#14000 LoadAndSend <= 1;
+        #20   LoadAndSend <= 0;
 		 
-//		#14000 LoadAndSend <= 1;
-//        #20   LoadAndSend <= 0;
+		#14000 LoadAndSend <= 1;
+        #20   LoadAndSend <= 0;
 		 
 	//	#1500 $finish;
 
