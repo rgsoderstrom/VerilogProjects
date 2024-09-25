@@ -2,6 +2,7 @@
 /*
     testbench_DPR_1 - testbench for Dual Port RAM
                     - RAM configured as 1024 words, each 16 bits
+                    
 */    
 
 /*

@@ -3,7 +3,7 @@
 	SampleMsgSender.v
 		- build and send one of a set of sample messages
 		- for each set of msgs:
-			- assert "Prep" once, then "Send" for each individual message
+			- assert "Prepare" once, then "LoadAndSend" for each individual message
 		- sets "AllSent" after last message
 */
 
@@ -24,7 +24,7 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
 							 
 						  input  [15:0]          SampleWord, // A/D Sample Buffer interface
 						  output [AddrWidth-1:0] ReadAddr,
-						  output                 SampleRead,
+						  output reg             SampleRead,
 						  input  [AddrWidth:0]   WriteAddr, // total number to send
 						
 					  	  input        P2S_Empty, // output serializer can accept a byte
@@ -41,11 +41,11 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
 	// number samples this msg
 	wire [15:0] NumbRemaining;
 	wire [15:0] MsgSampleCount;
-	reg  [15:0] SampleCountDown;
+	reg  [15:0] SampleCountDown = 16'd0;
 	assign MsgSampleCount = MaxSamplesPerMsg < NumbRemaining ? MaxSamplesPerMsg : NumbRemaining;
 	
 	// select source of next word to write to msg RAM
-	reg 		DataWordMuxSel;
+	reg 		DataWordMuxSel = 0;
     wire [15:0] MsgDataWord;
 	assign MsgDataWord = DataWordMuxSel == 0 ? MsgSampleCount : SampleWord;
 	
@@ -54,6 +54,11 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
 	reg ClearSRA;  // clear read addr counter
 	reg IncrSRA;   // clear read addr counter
 	assign ReadAddr = ReadAddrCounter;
+	
+	always @ (posedge Clock50MHz) begin
+	   if (ClearSRA == 1) ReadAddrCounter <= 0;
+	   if (IncrSRA  == 1) ReadAddrCounter <= ReadAddrCounter + 1;
+	end
 	
 	// determine number of samples remaining. 16 bit, non-negative
     assign NumbRemaining = WriteAddr > ReadAddr ? WriteAddr - ReadAddr : 0;             
@@ -65,6 +70,11 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
 	reg          ClearMWA;
 	reg          IncrMWA;
 	
+	always @ (posedge Clock50MHz) begin
+	   if (ClearMWA == 1) MessageWriteAddr <= 0;
+	   if (IncrMWA  == 1) MessageWriteAddr <= MessageWriteAddr + 1;
+	end
+	
     // Message RAM
     wire [7:0] MsgDataByte;
     wire ByteAddrClear;
@@ -74,16 +84,16 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
     DualPortRAM2 #(.AddrWidth (N)) 
               U1  (.Clk (Clock50MHz),
                    .ByteWriteData (8'b0),
-                   .ByteWrite     (0),
+                   .ByteWrite     (1'b0),
                    .ByteReadData  (MsgDataByte),   // ByteReadData valid 3 clocks after ByteRead asserted
                    .ByteRead      (ByteReadCycle), 
                    .ByteClearAddr (ByteAddrClear),
                    .WordWriteData (MsgDataWord),
-                   .WordWriteAddr (MagDataAddr),
+                   .WordWriteAddr (MsgDataAddr),
                    .WordWrite     (MsgDataWrite),
                    .WordReadAddr  ('b0),
                    .WordReadData  (),
-                   .WordRead      (0));
+                   .WordRead      (1'b0));
     
     reg SendMsg;
     
@@ -100,7 +110,7 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
                   .P2SLoad         (LoadByte),
                   .P2SEmpty        (P2S_Empty),
 				  .DataByte        (MsgDataByte),    
-                  .ClearDataAddr   (), // not used
+                  .ClearDataAddr   (ByteAddrClear),
                   .RamRead         (ByteReadCycle));
 	
 	MsgHeaderGen #(.ID (SampleMsgID), .ByteCount (8 + 2 + 2 * MaxSamplesPerMsg)) 
@@ -112,22 +122,29 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
                    .LastReadByte   (LastHeaderByte),
                    .HeaderByte     (HeaderByte));
                    
-    localparam Idle = 0;                   
-    localparam Prep = 6'h01;   
+    localparam Idle  = 0;                   
+    localparam Prep1 = 6'h01;   
                     
-    localparam WriteCount1  = 6'h10;                   
-    localparam WriteCount2  = 6'h11;                   
-    localparam WriteCount2A = 6'h12;                   
-    localparam WriteCount2B = 6'h13;                   
-    localparam WriteCount3  = 6'h14;     
+    localparam LoadCount1 = 6'h11;                   
+    localparam LoadCount2 = 6'h12;                   
+    localparam LoadCount3 = 6'h13;     
+    localparam LoadCount4 = 6'h14;     
+    localparam LoadCount5 = 6'h15;     
                   
-    localparam WriteData1  = 6'h21;                   
-    localparam WriteData2  = 6'h22;                   
-    localparam WriteData2A = 6'h23;                   
-    localparam WriteData2B = 6'h24;                   
-    localparam WriteData3  = 6'h25;
+    localparam LoadData1 = 6'h21;                   
+    localparam LoadData2 = 6'h22;                   
+    localparam LoadData3 = 6'h23;                   
+    localparam LoadData4 = 6'h24;                   
+    localparam LoadData5 = 6'h25;                   
+    localparam LoadData5A = 6'h2D;                   
+    localparam LoadData6 = 6'h26;                   
+    localparam LoadData7 = 6'h27;                   
+    localparam LoadData8 = 6'h28;                   
+    localparam LoadData9 = 6'h29;                   
+    localparam LoadDataA = 6'h2a;         
+    localparam LoadDataB = 6'h2b;         
                        
-    localparam SendMsg1    = 6'h30;      
+    localparam SendMsg1  = 6'h31;      
     
     reg [5:0] state = Idle;
     
@@ -136,35 +153,30 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
     always @ (posedge Clock50MHz)
     begin
         case (state)
-            Idle: if (Prepare == 1) state <= Prep; 
-                  else if (LoadAndSend == 1) state <= WriteCount1;    
+            Idle: if      (Prepare == 1)     state <= Prep1; 
+                  else if (LoadAndSend == 1) state <= LoadCount1;    
     
-            Prep: state <= Idle;
+            Prep1: state <= Idle;
             
-            WriteCount1: begin DataWordMuxSel <= 0; 
-                               state <= WriteCount2; 
-                         end            
-    
-            WriteCount2:  state <= WriteCount2A;                    
-            WriteCount2A: state <= WriteCount2B;        
-            WriteCount2B: state <= WriteCount3;        
-    
-            WriteCount3: begin DataWordMuxSel <= 1;
-                               SampleCountDown <= MsgSampleCount;
-                               state <= WriteData1;
-                         end
-                         
-            WriteData1: if (SampleCountDown == 0) state <= SendMsg1;
-                        else state <= WriteData2;
-                        
-            WriteData2:  state <= WriteData2A;                     
-            WriteData2A: state <= WriteData2B;                     
-            WriteData2B: state <= WriteData3;
-            
-            WriteData3: begin SampleCountDown <= SampleCountDown - 1; 
-                              state <= WriteData1; 
-                        end
-                                 
+            LoadCount1: begin DataWordMuxSel <= 0; state <= LoadCount2; end                                     
+            LoadCount2: state <= LoadCount3;                                                  
+            LoadCount3: state <= LoadCount4;          
+            LoadCount4: state <= LoadCount5;                         
+            LoadCount5: state <= LoadData1;
+
+            LoadData1: begin DataWordMuxSel <= 1; state <= LoadData2; end
+            LoadData2: begin SampleCountDown <= MsgSampleCount; state <= LoadData3; end
+            LoadData3: if (SampleCountDown == 0) state <= SendMsg1; else state <= LoadData4;
+            LoadData4: state <= LoadData5;
+            LoadData5: state <= LoadData5A;
+            LoadData5A: state <= LoadData6;
+            LoadData6: state <= LoadData7;
+            LoadData7: state <= LoadData8;
+            LoadData8: state <= LoadData9;
+            LoadData9: state <= LoadDataA;
+            LoadDataA: begin SampleCountDown <= SampleCountDown - 1; state <= LoadDataB; end
+            LoadDataB: state <= LoadData3;
+                                
             SendMsg1: state <= Idle;
             
             default: state <= Idle;            
@@ -173,12 +185,14 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
 
     always @ (*)
     begin
-        ClearSRA = (state == Prep);    
-        IncrSRA  = (state == WriteData3);
-        ClearMWA = (state == WriteCount1);
-        IncrMWA  = (state == WriteData3);    
+        ClearSRA = (state == Prep1);            
+        IncrSRA  = (state == LoadData8);
         
-        MsgDataWrite = (state == WriteCount2) || (state == WriteData2);
+        ClearMWA = (state == LoadCount2);
+        IncrMWA  = (state == LoadCount5) || (state == LoadData9);    
+        
+        MsgDataWrite = (state == LoadCount3) || (state == LoadData6);
+        SampleRead   = (state == LoadData4);
         SendMsg      = (state == SendMsg1);            
     end
     

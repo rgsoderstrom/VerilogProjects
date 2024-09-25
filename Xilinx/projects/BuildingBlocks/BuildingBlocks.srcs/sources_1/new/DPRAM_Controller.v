@@ -42,13 +42,13 @@ module DPRAM_Controller (input      Clk,
         case (State)
 			Idle: begin
 				    if (ByteWrite == 1) begin
-                       AddrMuxSel = 2'b0;
+                       AddrMuxSel <= 2'b0;
 					   WordMuxSel <= 0;
 					   State <= BW1;
 					end
 					
 					else if (ByteRead == 1) begin
-                       AddrMuxSel = 2'b0;
+                       AddrMuxSel <= 2'b0;
 					   WordMuxSel <= 0;
 					   State <= BR1;
 					end

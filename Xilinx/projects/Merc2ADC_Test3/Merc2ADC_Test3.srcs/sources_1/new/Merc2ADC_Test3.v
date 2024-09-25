@@ -83,12 +83,18 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 	wire [15:0] WordWriteData;		
 	
 	// wires for RAM
-	wire [RamAddrBits:0]   WordAddr;      // word interface for writing
+	wire [RamAddrBits:0]   SampleWriteCnt;
+	wire [RamAddrBits-1:0] WordAddr;      // word interface for writing
 	wire       			   WordWrite;     //   "
-	wire [7:0]			   ByteReadData;  // byte interface for reading
-	wire    			   ByteReadCycle; //   "
-	wire    			   ByteAddrClear; //   "
+//	wire [7:0]			   ByteReadData;  // byte interface for reading
+//	wire    			   ByteReadCycle; //   "
+//	wire    			   ByteAddrClear; //   "
 	wire                   DataMuxSel;
+	
+	wire [RamAddrBits-1:0] SampleReadAddr;
+	wire [15:0]            SampleReadData;
+	wire                   SampleRead;
+	
 	
 	// RAM word write address counter
 	wire    WordAddrMax;
@@ -252,9 +258,10 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                  .Clk    (Clock), 
 				 .AtZero (),
 				 .AtMax  (),
-                 .Q      (WordAddr));
+                 .Q      (SampleWriteCnt));  
 
-    assign WordAddrMax = WordAddr (RamAddrBits) == 1;
+    assign WordAddr    = SampleWriteCnt [RamAddrBits-1:0];
+    assign WordAddrMax = SampleWriteCnt [RamAddrBits] == 1;
 
 	SerializerPtoS #(.Width (8))
                 U10 (.Input (OutputMsgByte),
@@ -299,22 +306,23 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 				      .MaxSamplesPerMsg (256), // max samples per message
                       .AddrWidth        (RamAddrBits))  // up to 2^AddrWidth samples to send
 				  U14 (.Clock50MHz (Clock),        
- 				       .Clear (Clear),
-				       .Prepare (ClearSampleMsgCntr),     // assert once prior to a message set
-					   .Ready   (SampleSenderReady),       // ready to send a message
-					   .LoadAndSend (SendSampleMsg), // load samples and send one message
-					   .AllSent (AllSamplesSent),     // true when all sample data has been sent
+ 				       .Clear      (Clear),
+					   
+				       .Prepare     (ClearSampleMsgCntr), // assert once prior to a message set
+					   .Ready       (SampleSenderReady),  // ready to send a message
+					   .LoadAndSend (SendSampleMsg),      // load samples and send one message
+					   .AllSent     (AllSamplesSent),     // true when all sample data has been sent
 							 
 					   .SeqNumber (NextSeqNumber),
 							 
-						  input  [15:0]          SampleWord, // A/D Sample Buffer interface
-						  output [AddrWidth-1:0] ReadAddr,
-						  output                 SampleRead,
-						  input  [AddrWidth:0]   WriteAddr, // total number to send
+					   .SampleWord (SampleReadData), 
+					   .ReadAddr   (SampleReadAddr),
+					   .SampleRead (SampleRead),
+					   .WriteAddr  (SampleWriteCnt), // total number to send
 						
-					  	  input        P2S_Empty, // output serializer can accept a byte
-						  output       LoadByte, 
-						  output [7:0] MsgByteOut);
+					   .P2S_Empty  (P2S_Empty), // output serializer can accept a byte
+					   .LoadByte   (P2SLoad1), 
+					   .MsgByteOut (SampleMsgByte));
                    
 //    SampleMsgSetBuilder #(.SampleMsgID (SampleMsgID),
 //					      .NumberMsgs (NumberMsgs))

@@ -8,22 +8,22 @@
 module Testbench_SmplMsgSend;
 
     localparam AddrWidth = 6;
-    localparam MaxSamplesPerMsg = 16;
+    localparam MaxSamplesPerMsg = 8;
     
     reg  Clock = 0;
     reg  Clear = 1;
 
-    reg [15:0] SeqNumber = 1;
+    reg [15:0] SeqNumber = 16'h1357;
     
     // stream of samples
-    reg [15:0] InputRamp = 1;
+    reg [15:0] InputRamp = 16'h3201;
     reg [AddrWidth:0]    SampleWriteCount = 0;
     wire [AddrWidth-1:0] SampleWriteAddr = SampleWriteCount [AddrWidth-1:0];
     
-    wire [15:0]          WordWriteData;
+    //wire [15:0]          WordWriteData;
     wire [15:0]          SampleReadData;
     wire [AddrWidth-1:0] SampleReadAddr;
-    reg                  SampleWrite;
+    reg                  SampleWrite = 0;
     wire                 SampleRead;
 
 
@@ -31,9 +31,9 @@ module Testbench_SmplMsgSend;
               U1  (.Clk (Clock),
                    .ByteWriteData ('d0),
                    .ByteReadData (),
-                   .ByteWrite (0),
-                   .ByteRead (0), 
-                   .ByteClearAddr (0),
+                   .ByteWrite (1'b0),
+                   .ByteRead (1'b0), 
+                   .ByteClearAddr (1'b0),
                    .WordWriteData (InputRamp),
                    .WordReadData  (SampleReadData),
                    .WordWriteAddr (SampleWriteAddr),
@@ -52,21 +52,20 @@ module Testbench_SmplMsgSend;
     
     SampleMsgSender  #(.MaxSamplesPerMsg (MaxSamplesPerMsg),
                        .AddrWidth (AddrWidth))  
-				   U2 (.Clock50MHz (Clock),        
- 				       .Clear (Clear),
-					   .Prepare (Prepare),
-					   .Ready (ReadyToSend),       
+				   U2 (.Clock50MHz  (Clock),        
+ 				       .Clear       (Clear),
+					   .Prepare     (Prepare),
+					   .Ready       (ReadyToSend),       
 					   .LoadAndSend (LoadAndSend), 
-					   .AllSent (AllSent),     							 
-					   .SeqNumber (SeqNumber),
-							 
-					   .SampleWord (SampleReadData),
-					   .ReadAddr (SampleReadAddr),
-				       .SampleRead (SampleRead),
-					   .WriteAddr (SampleWriteCount),
-				  	   .P2S_Empty (P2S_Empty),
-					   .LoadByte (P2S_Load), 
-					   .MsgByteOut (SampleMsgByte));
+					   .AllSent     (AllSent),     							 
+					   .SeqNumber   (SeqNumber),							 
+					   .SampleWord  (SampleReadData),
+					   .ReadAddr    (SampleReadAddr),
+				       .SampleRead  (SampleRead),
+					   .WriteAddr   (SampleWriteCount),
+				  	   .P2S_Empty   (P2S_Empty),
+					   .LoadByte    (P2S_Load1), 
+					   .MsgByteOut  (SampleMsgByte));
 
     //*******************************************************************
     // simulate Serializer
@@ -76,13 +75,13 @@ module Testbench_SmplMsgSend;
     assign P2S_Empty = (SerializerCntDown == 0);
     
     always @ (posedge Clock) begin
-        if (P2S_Load == 1) begin
+        if (P2S_Load1 == 1) begin
             Serializer <= SampleMsgByte;
-            SerializerCntDown = 8'd16;        
+            SerializerCntDown <= 8'd16;        
         end
         
         else if (SerializerCntDown != 0)
-            SerializerCntDown = SerializerCntDown - 1;                
+            SerializerCntDown <= SerializerCntDown - 1;                
     end
     
 	//*************************************************
@@ -93,6 +92,7 @@ module Testbench_SmplMsgSend;
     initial
     begin
         $display ("module: %m");
+        $monitor ($time, " Serializer %h", Serializer);
     //    $monitor ($time, " state %d, msgByte 0x%h, WriteByte %h", U1.state, U1.MessageByte, U1.WriteDataByte);
                             
             Clear = 1;
@@ -110,18 +110,17 @@ module Testbench_SmplMsgSend;
     // Test scenario
     //
     
-    integer i;
+    //integer i;
     
     initial
     begin
 	   // write samples into RAM
 	   #100 
-	       for (SampleWriteCount=0; SampleWriteCount<128; SampleWriteCount=SampleWriteCount+1)
+	       for (SampleWriteCount=0; SampleWriteCount<48; SampleWriteCount=SampleWriteCount+1)
 	       begin
-	         //  SampleWriteCount <= i;
-	             SampleWrite <= 1;
+	         #30 SampleWrite <= 1;
 	         #20 SampleWrite <= 0;
-	         #60 InputRamp = InputRamp + 1;       
+	         #60 InputRamp <= InputRamp + 1;       
 	       end
 		  
         // send messages
@@ -130,7 +129,16 @@ module Testbench_SmplMsgSend;
         #100 LoadAndSend <= 1;
         #20  LoadAndSend <= 0;
 		
-		#1000 $finish;
+		#14000 LoadAndSend <= 1;
+        #20   LoadAndSend <= 0;
+		 
+//		#14000 LoadAndSend <= 1;
+//        #20   LoadAndSend <= 0;
+		 
+//		#14000 LoadAndSend <= 1;
+//        #20   LoadAndSend <= 0;
+		 
+	//	#1500 $finish;
 
     end    
     

@@ -49,7 +49,7 @@ module DualPortRAM2 #(parameter AddrWidth = 10)
 	initial
     begin
         ByteAddrCounter <= 0;
-        WordOut <= 0;
+        WordOut <= 0; // 16'habcd;
     end
 
 	// Byte Address Counter
@@ -63,10 +63,10 @@ module DualPortRAM2 #(parameter AddrWidth = 10)
 	// Addr Mux
     always @ (*) begin
 		case (AddrMuxSel)
-			2'b00: MemoryAddr = ByteAddrCounter [AddrWidth:1];
-			2'b01: MemoryAddr = WordReadAddr;
-			2'b10: MemoryAddr = WordWriteAddr;
-			default: MemoryAddr = 0;
+			2'b00: MemoryAddr <= ByteAddrCounter [AddrWidth:1];
+			2'b01: MemoryAddr <= WordReadAddr;
+			2'b10: MemoryAddr <= WordWriteAddr;
+			default: MemoryAddr <= 0;
 		endcase
 	end
 	
@@ -90,8 +90,8 @@ module DualPortRAM2 #(parameter AddrWidth = 10)
 	
     always @ (*) begin
 		case (WordMuxSel)
-			1'b0: WordIn = WordFromBytes;
-			1'b1: WordIn = WordWriteData;
+			1'b0: WordIn <= WordFromBytes;
+			1'b1: WordIn <= WordWriteData;
 			default: WordIn = 0;
 		endcase
 	end
