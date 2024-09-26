@@ -4,8 +4,8 @@
 
 `timescale 1ns / 1ps
 
-module ADC3_Controller #(parameter ClockFreq = 50_000_000, 
-                         parameter Fs = 19150) // sampling frequency
+module ADC3_Controller //#(parameter ClockFreq = 50_000_000, 
+                       //  parameter Fs = 19150) // sampling frequency
                        (input Clock,        
 				        input Clear,
 

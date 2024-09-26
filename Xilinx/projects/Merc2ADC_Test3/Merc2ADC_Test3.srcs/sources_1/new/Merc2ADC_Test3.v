@@ -11,7 +11,8 @@
 
 module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                          parameter ResetCount = 50_000_000,
-                         parameter Fs = 100_000) // 19150) // 4096)
+                         parameter ClockFreq = 50_000_000,
+                         parameter Fs = 4096)
                         (input Clock,        
 			  	         input ClearBar,
 					   
@@ -185,7 +186,8 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 				 .WriteMsg2       (WriteByte2));
 				 
 				 // Message word
-	MessageWord #(.BytesPerWord (2))
+	MessageWord #(.BytesPerWord (2), 
+	              .Default (10))
             U51  (.Clock (Clock),                   
 				  .ClearAddr (ClearByteAddr1),
 				  .WriteByte (WriteByte1),
@@ -193,7 +195,8 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 				  .DataWord  (AnalogGain));				 
 				 
 				 // Message word
-	MessageWord #(.BytesPerWord (2))
+	MessageWord #(.BytesPerWord (2),
+	              .Default (ClockFreq / Fs - 1))
             U52  (.Clock (Clock),                   
 				  .ClearAddr (ClearByteAddr2),
 				  .WriteByte (WriteByte2),
@@ -207,7 +210,7 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
  		   .select (dacMuxSel),
 	       .out    (dacInputWord));
 				 
-    ADC3_Controller #(.Fs (Fs))
+    ADC3_Controller // #(.Fs (Fs))
                   U6 (.Clock (Clock),        
 				      .Clear (Clear),						      
                       .RcvdMsgID       (MessageID),
@@ -236,9 +239,9 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                U7 (.Clk (Clock),
                    .ByteWriteData (8'h00),
                    .ByteReadData  (),   // ByteReadData valid 3 clocks after ByteRead asserted
-                   .ByteWrite     (0),
-                   .ByteRead      (0), 
-                   .ByteClearAddr (0), 
+                   .ByteWrite     (1'b0),
+                   .ByteRead      (1'b0), 
+                   .ByteClearAddr (1'b0), 
                    .WordWriteData (WordWriteData),
                    .WordReadData  (SampleReadData),
                    .WordWriteAddr (WordAddr),
@@ -340,8 +343,8 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 
 
                                   
-  //Mercury2_ADC_Sim 
-    Mercury2_ADC 
+    Mercury2_ADC_Sim 
+  //Mercury2_ADC 
 				U15	(.clock   (Clock),
                      .trigger (ADC_Trigger),
                      .channel (3'b000),
@@ -353,8 +356,8 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                      .adc_cs   (adc_csn), 
                      .adc_clk  (adc_sck));
 
-  //Mercury2_DAC_Sim 
-    Mercury2_DAC 
+    Mercury2_DAC_Sim 
+  //Mercury2_DAC 
 			U16 (.clk_50MHZ (Clock),
 				 .trigger (DAC_Trigger),
 				 .channel (1'b1),   

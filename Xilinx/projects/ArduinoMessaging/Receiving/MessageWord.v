@@ -2,12 +2,13 @@
 /*
     MessageWord.v
 	  - Get data from a message with a single data word
-	  - Connect input to a MsgRounter
+	  - Connect input to a MsgRouter
 */
 
 `timescale 1ns / 1ps
 
-module MessageWord #(parameter BytesPerWord = 4)
+module MessageWord #(parameter BytesPerWord = 4,
+                     parameter Default = 0)
                     (input  Clock,                   
 					 input ClearAddr,
 					 input WriteByte,
@@ -18,7 +19,7 @@ module MessageWord #(parameter BytesPerWord = 4)
  	localparam AddrBits = $clog2 (NumberBits);
     reg  [AddrBits-1:0] MSB = 7;
 
-	reg [8 * BytesPerWord - 1:0] DataByteSet = 0;
+	reg [8 * BytesPerWord - 1:0] DataByteSet = Default;
 	assign DataWord = DataByteSet;
 
     always @(posedge Clock)

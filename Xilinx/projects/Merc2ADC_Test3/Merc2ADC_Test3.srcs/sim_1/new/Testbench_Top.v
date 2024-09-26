@@ -27,7 +27,10 @@ module Testbench_Top;
 	
 
 
-    Merc2ADC_Test3 #(.RamAddrBits (6), .ResetCount (5), .Fs (1_000_000))
+    Merc2ADC_Test3 #(.RamAddrBits (6), 
+                     .ResetCount (5),
+                     .ClockFreq (50_000_000),
+                     .Fs (2_500_000))
                  U1 (.Clock (Clock),        
 			  	     .ClearBar (ClearBar),
 			  	     
@@ -61,9 +64,9 @@ module Testbench_Top;
 	
     initial
     begin
-        M1 [0] = 8'h34; M1 [1] = 8'h12; M1 [2] = 8'h08; M1 [3] = 8'h00; M1 [4] = 8'h00; M1 [5] = 8'h01; M1 [6] = 8'h01; M1 [7] = 8'h00; 
-        M2 [0] = 8'h34; M2 [1] = 8'h12; M2 [2] = 8'h08; M2 [3] = 8'h00; M2 [4] = 8'h01; M2 [5] = 8'h01; M2 [6] = 8'h02; M2 [7] = 8'h00; 
-        M3 [0] = 8'h34; M3 [1] = 8'h12; M3 [2] = 8'h08; M3 [3] = 8'h00; M3 [4] = 8'h02; M3 [5] = 8'h01; M3 [6] = 8'h03; M3 [7] = 8'h00; 
+        M1 [0] = 8'h34; M1 [1] = 8'h12; M1 [2] = 8'h08; M1 [3] = 8'h00; M1 [4] = 8'd100; M1 [5] = 8'd00; M1 [6] = 8'h01; M1 [7] = 8'h00; 
+        M2 [0] = 8'h34; M2 [1] = 8'h12; M2 [2] = 8'h08; M2 [3] = 8'h00; M2 [4] = 8'd101; M2 [5] = 8'd00; M2 [6] = 8'h02; M2 [7] = 8'h00; 
+        M3 [0] = 8'h34; M3 [1] = 8'h12; M3 [2] = 8'h08; M3 [3] = 8'h00; M3 [4] = 8'd102; M3 [5] = 8'd00; M3 [6] = 8'h03; M3 [7] = 8'h00; 
     end		
     		         
 
@@ -77,26 +80,26 @@ module Testbench_Top;
 		
     initial
     begin
-		#1000 
+		#20_000 
 		
 		//******************************************
 		
 		// send message to UUT
 		
-//        for (j=0; j<8; j=j+1) // 8 bytes
-//        begin
-//			for (i=0; i<8; i=i+1) // 8 bits per byte
-//			  begin
-//				#10 inputDataBit <= M1 [j][7-i];  // ClearSampleBufferMsg                    
-//				#10 inputShiftClock <= 1'b1;
-//				#50 inputShiftClock <= 1'b0;
-//			  end
+        for (j=0; j<8; j=j+1) // 8 bytes
+        begin
+			for (i=0; i<8; i=i+1) // 8 bits per byte
+			  begin
+				#10 inputDataBit <= M1 [j][7-i];  // ClearSampleBufferMsg                    
+				#10 inputShiftClock <= 1'b1;
+				#50 inputShiftClock <= 1'b0;
+			  end
 		
-//			  #10 inputByteReady <= 1;
-//			  #20 inputByteReady <= 0;
-//        end
+			  #10 inputByteReady <= 1;
+			  #20 inputByteReady <= 0;
+        end
 
-//        #40000 // $finish;
+        #15_000
         
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
@@ -111,38 +114,36 @@ module Testbench_Top;
 			  #20 inputByteReady <= 0;
         end
 
-        #80000
+//        #80000
         
-        for (j=0; j<8; j=j+1) // 8 bytes
-        begin
-			for (i=0; i<8; i=i+1) // 8 bits per byte
-			  begin
-				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
-				#10 inputShiftClock <= 1'b1;
-				#50 inputShiftClock <= 1'b0;
-			  end
+//        for (j=0; j<8; j=j+1) // 8 bytes
+//        begin
+//			for (i=0; i<8; i=i+1) // 8 bits per byte
+//			  begin
+//				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
+//				#10 inputShiftClock <= 1'b1;
+//				#50 inputShiftClock <= 1'b0;
+//			  end
 		
-			  #10 inputByteReady <= 1;
-			  #20 inputByteReady <= 0;
-        end
+//			  #10 inputByteReady <= 1;
+//			  #20 inputByteReady <= 0;
+//        end
         
         
-        #150000
+//        #150000
         
-        for (j=0; j<8; j=j+1) // 8 bytes
-        begin
-			for (i=0; i<8; i=i+1) // 8 bits per byte
-			  begin
-				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
-				#10 inputShiftClock <= 1'b1;
-				#50 inputShiftClock <= 1'b0;
-			  end
+//        for (j=0; j<8; j=j+1) // 8 bytes
+//        begin
+//			for (i=0; i<8; i=i+1) // 8 bits per byte
+//			  begin
+//				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
+//				#10 inputShiftClock <= 1'b1;
+//				#50 inputShiftClock <= 1'b0;
+//			  end
 		
-			  #10 inputByteReady <= 1;
-			  #20 inputByteReady <= 0;
-        end
-        
-        
+//			  #10 inputByteReady <= 1;
+//			  #20 inputByteReady <= 0;
+//        end                
      end
 	 
 	//*****************************************************
