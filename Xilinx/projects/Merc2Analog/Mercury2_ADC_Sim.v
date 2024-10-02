@@ -24,7 +24,7 @@ assign adc_clk  = 0;
 initial
     State = 0;
     
-reg [9:0] dout = 10'd512;
+reg [9:0] dout = 10'd1;
 //reg [9:0] dout = 10'h1f6;
     
 always @ (posedge clock)

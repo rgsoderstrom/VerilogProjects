@@ -28,9 +28,11 @@ module Testbench_Top;
 
 
     Merc2ADC_Test3 #(.RamAddrBits (6), 
+                     .MaxSamplesPerMsg (20), //(16), // doesn't have to be a power of 2
                      .ResetCount (5),
                      .ClockFreq (50_000_000),
-                     .Fs (2_500_000))
+                     .DefaultFs (2_500_000),
+                     .DefaultGain (34))
                  U1 (.Clock (Clock),        
 			  	     .ClearBar (ClearBar),
 			  	     
@@ -68,6 +70,15 @@ module Testbench_Top;
         M2 [0] = 8'h34; M2 [1] = 8'h12; M2 [2] = 8'h08; M2 [3] = 8'h00; M2 [4] = 8'd101; M2 [5] = 8'd00; M2 [6] = 8'h02; M2 [7] = 8'h00; 
         M3 [0] = 8'h34; M3 [1] = 8'h12; M3 [2] = 8'h08; M3 [3] = 8'h00; M3 [4] = 8'd102; M3 [5] = 8'd00; M3 [6] = 8'h03; M3 [7] = 8'h00; 
     end		
+
+    initial
+    begin
+        $display ("module: %m");
+    //    $monitor ($time, " state %d, msgByte 0x%h, WriteByte %h", U1.state, U1.MessageByte, U1.WriteDataByte);
+                            
+            ClearBar = 0;
+        #50 ClearBar = 1;
+    end
     		         
 
     //
@@ -76,21 +87,21 @@ module Testbench_Top;
     always
         #10 Clock = ~Clock;  
         
-    integer i, j;
+    integer i, j, p;
 		
     initial
     begin
 		#20_000 
 		
 		//******************************************
-		
-		// send message to UUT
-		
+		//
+		// Clear - send ClearSampleBufferMsg 
+		//
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
 			for (i=0; i<8; i=i+1) // 8 bits per byte
 			  begin
-				#10 inputDataBit <= M1 [j][7-i];  // ClearSampleBufferMsg                    
+				#10 inputDataBit <= M1 [j][7-i];                    
 				#10 inputShiftClock <= 1'b1;
 				#50 inputShiftClock <= 1'b0;
 			  end
@@ -99,13 +110,16 @@ module Testbench_Top;
 			  #20 inputByteReady <= 0;
         end
 
-        #15_000
         
+        //
+        // Collect - send BeginSamplingMsg
+        //
+        #25_000
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
 			for (i=0; i<8; i=i+1) // 8 bits per byte
 			  begin
-				#10 inputDataBit <= M2 [j][7-i];  // BeginSamplingMsg                    
+				#10 inputDataBit <= M2 [j][7-i];                   
 				#10 inputShiftClock <= 1'b1;
 				#50 inputShiftClock <= 1'b0;
 			  end
@@ -114,40 +128,36 @@ module Testbench_Top;
 			  #20 inputByteReady <= 0;
         end
 
-//        #80000
+
+
+        //
+        // Send - SendSamples message
+        //
+        for (p=0; p<4; p=p+1) // send the "send" message this many times
+        begin        
+            #120000        
+            for (j=0; j<8; j=j+1) // 8 bytes
+            begin
+                for (i=0; i<8; i=i+1) // 8 bits per byte
+                  begin
+                    #10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
+                    #10 inputShiftClock <= 1'b1;
+                    #50 inputShiftClock <= 1'b0;
+                  end
+            
+                  #10 inputByteReady <= 1;
+                  #20 inputByteReady <= 0;
+            end
+        end
         
-//        for (j=0; j<8; j=j+1) // 8 bytes
-//        begin
-//			for (i=0; i<8; i=i+1) // 8 bits per byte
-//			  begin
-//				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
-//				#10 inputShiftClock <= 1'b1;
-//				#50 inputShiftClock <= 1'b0;
-//			  end
-		
-//			  #10 inputByteReady <= 1;
-//			  #20 inputByteReady <= 0;
-//        end
-        
-        
-//        #150000
-        
-//        for (j=0; j<8; j=j+1) // 8 bytes
-//        begin
-//			for (i=0; i<8; i=i+1) // 8 bits per byte
-//			  begin
-//				#10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
-//				#10 inputShiftClock <= 1'b1;
-//				#50 inputShiftClock <= 1'b0;
-//			  end
-		
-//			  #10 inputByteReady <= 1;
-//			  #20 inputByteReady <= 0;
-//        end                
      end
 	 
 	//*****************************************************
+	//*****************************************************
+	//*****************************************************
 
+    // accept and print bytes received from UUT
+    
 	reg [7:0] rxByte = 0;
 	integer k;
 	
@@ -164,7 +174,7 @@ module Testbench_Top;
 			end
 			
             rxByteCount <= rxByteCount + 1;
-            $display ($time, " Index: %d, byte: %h", rxByteCount, rxByte);
+            $display ($time, " %d: byte: %h", rxByteCount, rxByte);
 		end		
 	end
 	

@@ -16,7 +16,7 @@ module Testbench_SmplMsgSend;
     reg [15:0] SeqNumber = 16'h1357;
     
     // stream of samples
-    reg [15:0] InputRamp = 16'h3201;
+    reg [15:0] InputRamp = 16'hAA01;
     reg [AddrWidth:0]    SampleWriteCount = 0;
     wire [AddrWidth-1:0] SampleWriteAddr = SampleWriteCount [AddrWidth-1:0];
     
@@ -29,17 +29,17 @@ module Testbench_SmplMsgSend;
 
     DualPortRAM2 #(.AddrWidth (AddrWidth)) 
               U1  (.Clk (Clock),
-                   .ByteWriteData ('d0),
-                   .ByteReadData (),
-                   .ByteWrite (1'b0),
-                   .ByteRead (1'b0), 
+                   .ByteWriteData (8'b0),
+                   .ByteReadData  (),
+                   .ByteWrite     (1'b0),
+                   .ByteRead      (1'b0), 
                    .ByteClearAddr (1'b0),
                    .WordWriteData (InputRamp),
                    .WordReadData  (SampleReadData),
                    .WordWriteAddr (SampleWriteAddr),
                    .WordReadAddr  (SampleReadAddr),
-                   .WordWrite (SampleWrite),
-                   .WordRead  (SampleRead));
+                   .WordWrite     (SampleWrite),
+                   .WordRead      (SampleRead));
 
     reg Prepare = 0;
     reg LoadAndSend = 0;
@@ -62,7 +62,7 @@ module Testbench_SmplMsgSend;
 					   .SampleWord  (SampleReadData),
 					   .ReadAddr    (SampleReadAddr),
 				       .SampleRead  (SampleRead),
-					   .WriteAddr   (SampleWriteCount),
+					   .SampleCount (SampleWriteCount),
 				  	   .P2S_Empty   (P2S_Empty),
 					   .LoadByte    (P2S_Load1), 
 					   .MsgByteOut  (SampleMsgByte));
@@ -126,9 +126,13 @@ module Testbench_SmplMsgSend;
         // send messages
         #100 Prepare <= 1;
         #20  Prepare <= 0;
+        
         #100 LoadAndSend <= 1;
         #20  LoadAndSend <= 0;
 		
+		#14000 LoadAndSend <= 1;
+        #20   LoadAndSend <= 0;
+		 
 		#14000 LoadAndSend <= 1;
         #20   LoadAndSend <= 0;
 		 

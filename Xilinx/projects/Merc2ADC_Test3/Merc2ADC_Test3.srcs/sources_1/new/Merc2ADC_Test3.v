@@ -9,10 +9,12 @@
 
 `timescale 1ns / 1ps
 
-module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
-                         parameter ResetCount = 50_000_000,
-                         parameter ClockFreq = 50_000_000,
-                         parameter Fs = 4096)
+module Merc2ADC_Test3 # (parameter RamAddrBits = 10,        // 2 ^ RamAddrBits samples
+                         parameter MaxSamplesPerMsg = 256,  // does not have to be a power of 2
+                         parameter ResetCount  = 50_000_000,
+                         parameter ClockFreq   = 50_000_000,
+                         parameter DefaultFs   = 4096,
+                         parameter DefaultGain = 12)
                         (input Clock,        
 			  	         input ClearBar,
 					   
@@ -48,9 +50,6 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
     localparam ReadyMsgID    = 16'd201;
     localparam AllSentMsgID  = 16'd202; 
 	
-	// IMPROVE THIS
-	localparam NumberMsgs = (1 << RamAddrBits) / (256 /*sa/msg*/);
-
 	//********************************************************************	
 	
 	// wires for input serializer
@@ -60,7 +59,6 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 	wire       InputByteReady;
 	
 	// wires from msg router
-	//   - all incoming msgs are header-only
 	wire        MessageComplete;
 	wire [15:0] MessageID;
 	
@@ -76,29 +74,23 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 	wire       ADC_Valid;
 	
 	// wires from ADC to RAM
-	wire        DataMuxSelect;
 	wire [15:0] PaddedSample; 
 	assign      PaddedSample [9:0] = Sample;
 	assign      PaddedSample [15:10] = 6'b0;
-	
-	wire [15:0] WordWriteData;		
-	
-	// wires for RAM
-	wire [RamAddrBits:0]   SampleWriteCnt;
-	wire [RamAddrBits-1:0] WordAddr;      // word interface for writing
-	wire       			   WordWrite;     //   "
-//	wire [7:0]			   ByteReadData;  // byte interface for reading
-//	wire    			   ByteReadCycle; //   "
-//	wire    			   ByteAddrClear; //   "
+		
+	// wires for Sample RAM
+	wire [RamAddrBits:0]   SampleCount;
+	wire [RamAddrBits-1:0] SampleWriteAddr; 
+	wire [15:0]            SampleWriteData;		
+	wire       			   SampleWrite;
 	wire                   DataMuxSel;
 	
 	wire [RamAddrBits-1:0] SampleReadAddr;
 	wire [15:0]            SampleReadData;
 	wire                   SampleRead;
 	
-	
 	// RAM word write address counter
-	wire    WordAddrMax;
+	wire    SampleWriteAddrWrapped;
 	wire    ClearWriteAddr;
 	wire    IncrWriteAddr;
 	
@@ -109,22 +101,22 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 	wire SendReadyMsg;
 	wire SendAllSentMsg;
   //wire ReadyMsgSent;
-	wire ClearSampleMsgCntr;
+	wire ClearReadAddr;
 	wire SendSampleMsg;
-	wire SampleSenderReady;
-	wire AllSamplesSent;
+  //wire SampleSenderReady;
+  //wire AllSamplesSent;
 	wire IncrSeqNumber;
 
 	// wires for output message generation
 	
 	wire [1:0] OutputMsgSelect;
 	wire [7:0] RdyMsgByte;
-	wire [7:0] AllSentMsgByte;
+//	wire [7:0] AllSentMsgByte;
 	wire [7:0] SampleMsgByte;
 	wire       P2SLoad0; //
 	wire       P2SLoad1;
-	wire       P2SLoad2;
-    assign     LoadOutputByte = P2SLoad0 | P2SLoad1 | P2SLoad2;
+//	wire       P2SLoad2;
+    assign     LoadOutputByte = P2SLoad0 | P2SLoad1;// | P2SLoad2;
 	
 	//*************************************************************************
 
@@ -162,8 +154,8 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                     .DataOut (InputByte));			
 			   
 	wire WriteByte1, WriteByte2, ClearByteAddr1, ClearByteAddr2;
-	wire dacMuxSel;
-	wire [15:0] dacInputWord;
+//	wire dacMuxSel;
+//	wire [15:0] dacInputWord;
 	wire [15:0] AnalogGain;
 	wire [15:0] SampleClockDivisor;
 	wire  [7:0] MessageByte;
@@ -187,7 +179,7 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 				 
 				 // Message word
 	MessageWord #(.BytesPerWord (2), 
-	              .Default (10))
+	              .Default (DefaultGain))
             U51  (.Clock (Clock),                   
 				  .ClearAddr (ClearByteAddr1),
 				  .WriteByte (WriteByte1),
@@ -196,43 +188,35 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 				 
 				 // Message word
 	MessageWord #(.BytesPerWord (2),
-	              .Default (ClockFreq / Fs - 1))
+	              .Default (ClockFreq / DefaultFs - 1))
             U52  (.Clock (Clock),                   
 				  .ClearAddr (ClearByteAddr2),
 				  .WriteByte (WriteByte2),
 				  .DataByte  (MessageByte),
 				  .DataWord  (SampleClockDivisor));
 				 	 
-				 // DAC Mux
-    Mux2 #(.Width (16))
-	  U53 (.in0    (16'd0),
-           .in1    (AnalogGain),
- 		   .select (dacMuxSel),
-	       .out    (dacInputWord));
-				 
     ADC3_Controller // #(.Fs (Fs))
                   U6 (.Clock (Clock),        
 				      .Clear (Clear),						      
                       .RcvdMsgID       (MessageID),
                       .RcvdMsgComplete (MessageComplete),				      
                       .ADC_Valid          (ADC_Valid),
-                      .AllSamplesSent     (AllSamplesSent),
-                      .SampleMsgSent      (SampleSenderReady),
-                      .WordAddrMax 		  (WordAddrMax),                      
+                    //.AllSamplesSent     (AllSamplesSent),
+                    //.SampleMsgSent      (SampleSenderReady),
+                      .SampleWriteAddrWrapped	  (SampleWriteAddrWrapped),                      
                       .SendReadyMsg	 	  (SendReadyMsg),  
                       .SendSamplesMsg	  (SendSampleMsg),
-                      .SendAllSentMsg	  (SendAllSentMsg),					                        
+                //      .SendAllSentMsg	  (SendAllSentMsg),					                        
                       .ADC_Trigger 		  (ADC_Trigger),
                       .ClearWriteAddr	  (ClearWriteAddr),
                       .IncrWriteAddr	  (IncrWriteAddr),
-                      .WordWrite 		  (WordWrite),
+                      .SampleWrite 		  (SampleWrite),
                       .DataMuxSel		  (DataMuxSel),
                       .DAC_Trigger		  (DAC_Trigger),
-                      .ByteAddrClear	  (ByteAddrClear),
-                      .ClearSampleMsgCntr (ClearSampleMsgCntr),
+                  //  .ByteAddrClear	  (ByteAddrClear),
+                      .ClearReadAddr (ClearReadAddr),
                       .OutputMsgSelect    (OutputMsgSelect),
 					  .IncrSeqCntr        (IncrSeqNumber),
-					  .dacMuxSel          (dacMuxSel),
 					  .SampleClockDivisor (SampleClockDivisor));
      
     DualPortRAM2 #(.AddrWidth (RamAddrBits)) 
@@ -242,18 +226,18 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                    .ByteWrite     (1'b0),
                    .ByteRead      (1'b0), 
                    .ByteClearAddr (1'b0), 
-                   .WordWriteData (WordWriteData),
+                   .WordWriteData (SampleWriteData),
                    .WordReadData  (SampleReadData),
-                   .WordWriteAddr (WordAddr),
+                   .WordWriteAddr (SampleWriteAddr),
                    .WordReadAddr  (SampleReadAddr),
-                   .WordWrite     (WordWrite),
+                   .WordWrite     (SampleWrite),
                    .WordRead      (SampleRead));
 	 
     Mux2 #(.Width (16))
-		 U8 (.in0    (16'h1122),
+		 U8 (.in0    (16'h0),        // write 0 to clear RAM
              .in1    (PaddedSample),
  			 .select (DataMuxSel),
-	         .out    (WordWriteData));
+	         .out    (SampleWriteData));
 
 	CounterUEC #(.Width (RamAddrBits + 1))
             U9  (.Enable (IncrWriteAddr),
@@ -261,10 +245,10 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                  .Clk    (Clock), 
 				 .AtZero (),
 				 .AtMax  (),
-                 .Q      (SampleWriteCnt));  
+                 .Q      (SampleCount));  
 
-    assign WordAddr    = SampleWriteCnt [RamAddrBits-1:0];
-    assign WordAddrMax = SampleWriteCnt [RamAddrBits] == 1;
+    assign SampleWriteAddr        = SampleCount [RamAddrBits-1:0];
+    assign SampleWriteAddrWrapped = SampleCount [RamAddrBits] == 1;
 
 	SerializerPtoS #(.Width (8))
                 U10 (.Input (OutputMsgByte),
@@ -279,7 +263,7 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
 
     Mux4 U11 (.in0  (RdyMsgByte),
               .in1  (SampleMsgByte),
-              .in2  (AllSentMsgByte),
+              .in2  (), // AllSentMsgByte),
               .in3  (8'h00),
  			  .select (OutputMsgSelect),
 	          .out    (OutputMsgByte));
@@ -294,57 +278,40 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                    .LoadByte  (P2SLoad0),
 				   .MsgByte   (RdyMsgByte));
                    
-	HeaderMsgSender #(.MsgID (AllSentMsgID)) 
-	          U13 (.Clock (Clock),
-                   .Clear (Clear),                       
-                   .Send  (SendAllSentMsg), 
-                   .P2S_Empty (P2S_Empty),
-                   .SeqNumber (NextSeqNumber),
-                   .Ready     (),  //        ?????????????????????????? ready to send, to controller
-                   .LoadByte  (P2SLoad2),
-				   .MsgByte   (AllSentMsgByte));
+//	HeaderMsgSender #(.MsgID (AllSentMsgID)) 
+//	          U13 (.Clock (Clock),
+//                   .Clear (Clear),                       
+//                   .Send  (SendAllSentMsg), 
+//                   .P2S_Empty (P2S_Empty),
+//                   .SeqNumber (NextSeqNumber),
+//                   .Ready     (),  //        ?????????????????????????? ready to send, to controller
+//                   .LoadByte  (P2SLoad2),
+//				   .MsgByte   (AllSentMsgByte));
 
 
-    SampleMsgSender #(.SampleMsgID (SampleMsgID),
-				      .MaxSamplesPerMsg (256), // max samples per message
-                      .AddrWidth        (RamAddrBits))  // up to 2^AddrWidth samples to send
-				  U14 (.Clock50MHz (Clock),        
- 				       .Clear      (Clear),
-					   
-				       .Prepare     (ClearSampleMsgCntr), // assert once prior to a message set
-					   .Ready       (SampleSenderReady),  // ready to send a message
-					   .LoadAndSend (SendSampleMsg),      // load samples and send one message
-					   .AllSent     (AllSamplesSent),     // true when all sample data has been sent
+    SampleMsgSender #(.SampleMsgID      (SampleMsgID),
+				      .MaxSamplesPerMsg (MaxSamplesPerMsg),
+                      .AddrWidth        (RamAddrBits))  // SampleRAM has up to 2^AddrWidth samples to be send
+				  U14 (.Clock50MHz    (Clock),        
+ 				       .Clear         (Clear),					   
+				       .ClearReadAddr (ClearReadAddr), // assert once prior to sending first msg of a batch
+					   .Ready         (), //SampleSenderReady),  // ready to send a message
+					   .LoadAndSend   (SendSampleMsg),      // load samples and send one message
+					//   .AllSent     (), // (AllSamplesSent),     // true when all sample data has been sent
 							 
 					   .SeqNumber (NextSeqNumber),
 							 
-					   .SampleWord (SampleReadData), 
-					   .ReadAddr   (SampleReadAddr),
-					   .SampleRead (SampleRead),
-					   .WriteAddr  (SampleWriteCnt), // total number to send
+					   .SampleWord     (SampleReadData), 
+					   .SampleReadAddr (SampleReadAddr),
+					   .SampleRead     (SampleRead),
+					   .SampleCount    (SampleCount), // total number to send
 						
 					   .P2S_Empty  (P2S_Empty), // output serializer can accept a byte
 					   .LoadByte   (P2SLoad1), 
 					   .MsgByteOut (SampleMsgByte));
-                   
-//    SampleMsgSetBuilder #(.SampleMsgID (SampleMsgID),
-//					      .NumberMsgs (NumberMsgs))
-//				     U14 (.Clock50MHz (Clock),        
-// 				          .Clear (ClearSampleMsgCntr),// asserted prior to each set of 32 messages					   
-//					      .Ready (SampleSenderReady), // ready to send a message, (state == Idle)
-//						  .Send  (SendSampleMsg),     // send one message
-//						  .AllSent    (AllSamplesSent),  // true when NumberMsgs sent
-//						  .SeqNumber  (NextSeqNumber),							 
-//						  .SampleByte (ByteReadData), // RAM interface
-//						  .ByteRead   (ByteReadCycle),						
-//						  .P2S_Empty  (P2S_Empty),     // output serializer
-//						  .LoadByte   (P2SLoad1), 
-//						  .MsgByteOut (SampleMsgByte));
-
-
-                                  
-    Mercury2_ADC_Sim 
-  //Mercury2_ADC 
+                                                     
+  //Mercury2_ADC_Sim 
+    Mercury2_ADC 
 				U15	(.clock   (Clock),
                      .trigger (ADC_Trigger),
                      .channel (3'b000),
@@ -356,12 +323,12 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,
                      .adc_cs   (adc_csn), 
                      .adc_clk  (adc_sck));
 
-    Mercury2_DAC_Sim 
-  //Mercury2_DAC 
+  //Mercury2_DAC_Sim 
+    Mercury2_DAC 
 			U16 (.clk_50MHZ (Clock),
 				 .trigger (DAC_Trigger),
 				 .channel (1'b1),   
-				 .Din     (dacInputWord [9:0]), // (10'd500), 
+				 .Din     (AnalogGain [9:0]), // (dacInputWord [9:0]), // (10'd500), 
 				 .Busy    (),
 				 .dac_csn  (dac_csn),
 				 .dac_sdi  (dac_sdi), 
