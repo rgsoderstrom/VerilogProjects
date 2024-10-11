@@ -4,7 +4,7 @@
 // SyncOneShot - synchronous one-shot
 //
 
-module SyncOneShot (input trigger, // pos edge trigger
+module SyncOneShot (input trigger, // low->high triggers, not required to be sync to clk
                     input clk,
                     input clr,  // async, active high
                     output Q);  // pos pulse, one clock period long
