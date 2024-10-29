@@ -5,8 +5,8 @@
 
 `timescale 1ns / 1ps
 
-module Mercury2_DAC__WrapperSim #(ClockFreq = 50_000_000, // Hz
-                                  SettlingTime = 4.5e-6)  // seconds
+module Mercury2_DAC_Wrapper_Sim #(parameter ClockFreq = 50_000_000, // Hz
+                                  parameter SettlingTime = 4.5e-6)  // seconds
                      (input  clk_50MHZ,                      
 					  input  trigger,
 					  input  channel,
