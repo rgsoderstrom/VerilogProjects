@@ -9,7 +9,7 @@
 
 `timescale 1ns / 1ps
 
-module Merc2ADC_Test3 # (parameter RamAddrBits = 10,        // 2 ^ RamAddrBits samples
+module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits samples
                          parameter MaxSamplesPerMsg = 256,  // does not have to be a power of 2
                          parameter ResetCount  = 50_000_000,
                          parameter ClockFreq   = 50_000_000,
@@ -140,9 +140,9 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 10,        // 2 ^ RamAddrBits s
 
 	//*************************************************************************
 		
-	SyncOneShot U1 (.trigger (InputBitShiftClock),  .clk (Clock), .clr (Clear), .Q (SInputBitShiftClock)),
-	            U2 (.trigger (InputByteDone),       .clk (Clock), .clr (Clear), .Q (SInputByteDone)),
-	            U3 (.trigger (OutputBitShiftClock), .clk (Clock), .clr (Clear), .Q (SOutputBitShiftClock));
+	SyncOneShot U1 (.trigger (InputBitShiftClock),  .clk (Clock), .clr (0/*Clear*/), .Q (SInputBitShiftClock)),
+	            U2 (.trigger (InputByteDone),       .clk (Clock), .clr (0/*Clear*/), .Q (SInputByteDone)),
+	            U3 (.trigger (OutputBitShiftClock), .clk (Clock), .clr (0/*Clear*/), .Q (SOutputBitShiftClock));
 			
 	SerializerStoP #(.Width (8)) 
                 U4 (.DataIn  (InputBit),
