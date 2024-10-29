@@ -14,23 +14,16 @@ module Testbench;
     reg clk = 0;
     reg clr = 0;
 
-    localparam Width = 10;    
-    localparam One = (1 << (Width - 1));
+    reg Trigger = 0;
+    wire Q;
     
-    localparam RW = Width;
-    localparam WW = Width+1;
-    
-    
-    
-    
-    reg [WW-1:0] WriteAddr =  100;     
-    reg [RW-1:0] ReadAddr = 0;     
-    wire [15:0] Remaining;   
-                        
-    Trial #(.Width (Width))
-        U1 (.WriteAddr (WriteAddr),
-            .ReadAddr  (ReadAddr),
-            .Remaining (Remaining));                    
+    SyncOneShot U1 (.trigger (Trigger), // pos edge trigger
+                    .clk (clk),
+                    .clr (clr),  // async, active high
+                    .Q (Q));  // pos pulse, one clock period long
+
+
+
     //
     // test bench initializations
     //    
@@ -41,7 +34,7 @@ module Testbench;
         //$monitor ($time, " EventCounter.Count = %d, EventCounter.Zero = %d", U1.Count, U1.Zero);
         
         clk   = 1'b0;
-        clr   = 1'b1; // clear is active high
+     //   clr   = 1'b1; // clear is active high
 
         #20 clr = 0; 
     end
@@ -56,16 +49,13 @@ module Testbench;
     // test run
     //
 
-    integer i;
+    //integer i;
         
     initial
     begin
-        #120 
-            for (i=0; i<150; i=i+1)
-            begin    
-              #20   ReadAddr = ReadAddr + 'd1;
-            end
-            
+        #123 Trigger = 1; // between clock edges
+        #50  Trigger = 0;
+                        
         #200 $finish;
     end
 
