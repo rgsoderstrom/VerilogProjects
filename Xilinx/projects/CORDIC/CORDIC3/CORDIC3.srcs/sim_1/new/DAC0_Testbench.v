@@ -18,15 +18,20 @@ module DAC0_Testbench;
     wire [9:0] PingData;
     wire Done;
     
-    DAC0_DataGenerator #(.RampIncr (1), .WindowDuration (2048))
-                       DG (.Clock50MHz (clk),
-                           .StartPing (PingTrigger),
-                           .dac_busy (dacBusy),
-                           .dac_trigger (dacTrigger),
-                           .PingDone (Done),
-                           .PingWords (PingData));
+    reg [15:0] WindowDuration = 10000;
+    reg [15:0] Frequency = 40800 / 190;
+    
+    DAC0_DataGenerator
+                       DG (.Clock50MHz     (clk),
+                           .StartPing      (PingTrigger),
+                           .dac_busy       (dacBusy),     
+                           .Frequency      (Frequency),                      
+                           .WindowDuration (WindowDuration),
+                           .dac_trigger    (dacTrigger),
+                           .PingDone       (Done),
+                           .PingWords      (PingData));
 
-    Mercury2_DAC_Wrapper
+    Mercury2_DAC_Wrapper_Sim
                      DS (.clk_50MHZ (clk),        // -- 50MHz onboard oscillator
                          .trigger (dacTrigger),   // -- assert to write Din to DAC
                          .channel (1'b0), // -- 0 = DAC0/A, 1 = DAC1/B
@@ -68,14 +73,15 @@ module DAC0_Testbench;
         #20
             PingTrigger = 0;
             
-//        #60000
-//            PingTrigger = 1;
+        #500_000
+            WindowDuration = 5000;
+            PingTrigger = 1;
         
-//        #20
-//            PingTrigger = 0;
+        #20
+            PingTrigger = 0;
 
-//        #10000 
-//            $finish;
+        #500_000 
+            $finish;
                    
     end
         

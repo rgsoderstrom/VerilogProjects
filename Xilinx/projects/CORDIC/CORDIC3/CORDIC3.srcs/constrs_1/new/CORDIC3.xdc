@@ -19,11 +19,6 @@ create_clock -period 20 -waveform {0 10} [get_ports {Clock50MHz}];
 # was io[39]
 set_property -dict {PACKAGE_PIN J3 IOSTANDARD LVCMOS33} [get_ports {test_point1}]
 
-# was io[20]
-#set_property -dict {PACKAGE_PIN K5 IOSTANDARD LVCMOS33} [get_ports {test_point1}]
-
-# was io[21]
-#set_property -dict {PACKAGE_PIN A3 IOSTANDARD LVCMOS33} [get_ports {test_point2}]
 
 # DAC interface
 set_property -dict {PACKAGE_PIN K12 IOSTANDARD LVCMOS33} [get_ports {dac_sdi}]

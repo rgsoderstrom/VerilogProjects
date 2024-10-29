@@ -5,18 +5,17 @@
 
 `timescale 1ns / 1ps
 
-module WindowGenerator #(parameter Width = 12,      // bits
-                                   RampStep = 1,
-                                   Duration = 1024) // time at max level, clocks
-                        (input  Clock,
+module WindowGenerator #(parameter Width = 12)      // bits. Default of 12 matches CORDIC                                                                      
+                        (input  Clock50MHz,
                          input  Clear,
                          input  Trigger,
-                         input  Step,
+                         input  [15:0] Duration,    // time at max level, clocks
                          output reg WindowDone,
                          output [Width-1:0] Window);
                          
-    localparam MAX = 12'hbff; // (1 << Width) - 1;
-                             
+    localparam MaxRampCount = 12'hbff; // (1 << Width) - 1;
+    localparam RampStep = 1;
+                                 
     reg [Width-1:0] RampCounter; // counts clocks during transitions
     reg [15:0] DurationCounter;  // counts clocks while at max
     reg [2:0] State;
@@ -31,7 +30,7 @@ module WindowGenerator #(parameter Width = 12,      // bits
         State <= 0;
     end
         
-    always @ (posedge Clock)
+    always @ (posedge Clock50MHz)
     begin
         if (Clear == 1)
         begin
@@ -48,11 +47,11 @@ module WindowGenerator #(parameter Width = 12,      // bits
                 WindowDone <= 0;
             end
             
-        else if (Step == 1)
+        else
             case (State)
                 0: State <= 0;
                 
-                1: if (RampCounter == MAX)
+                1: if (RampCounter == MaxRampCount)
                      begin 
                        DurationCounter <= 0;
                        State <= 2;
@@ -75,11 +74,5 @@ module WindowGenerator #(parameter Width = 12,      // bits
                 default: State <= 0;
             endcase
     end
-
-//    always @(*)
-//      begin
-//        WindowDone <= (State == 4); 
-//      end
-      
 endmodule
 

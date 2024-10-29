@@ -7,50 +7,60 @@
 
 module DAC1_Controller (input  Clock,
                         input  BeginBlanking,
-                        input  StartRamp,
+                        input  BeginRamp,
                         input  dac_busy,
                         input  CountEnable,
                         input  RampDone,
+						output reg InBlanking,
                         output reg dac_trigger,
                         output reg LoadBlanking,
-                        output reg InBlanking,
                         output reg LoadInitial);
-reg [7:0] State;
-
-initial
-    State = 7'h0;
-    
-always @ (posedge Clock)
-	begin
-        case (State)
-		    8'h00: if (BeginBlanking == 1)  State <= 8'h10; 
-		           else if (StartRamp == 1) State <= 8'h40;
-            
-            8'h10: State <= 8'h20;    
-            
-            8'h20: begin if (dac_busy == 0) State <= 8'h30; end
-            
-            8'h30: State <= 8'h35;
-            
-            8'h35: State <= 8'h00;
-            
-            8'h40: State <= 8'h50;
-            
-            8'h50: begin if (dac_busy == 0) State <= 8'h60; end	    
-            
-            8'h60: if (RampDone == 1) State <= 8'h00; else State <= 8'h70;
-            
-            8'h70: if (CountEnable == 1) State <= 8'h50;		    
-            
-        	default: State <= 7'h00;
-		endcase
-	end
+						
+	localparam Idle     = 4'h0;
+	localparam SetLB    = 4'h1;
+	localparam WaitDAC1 = 4'h2;
+	localparam LoadDAC1 = 4'h3;
+	localparam SetIB    = 4'h4;
+	localparam LoadRamp = 4'h5;
+	localparam WaitDAC2 = 4'h6;
+	localparam LoadDAC2 = 4'h7;
+	localparam WaitCE   = 4'h8;
 	
-always @ (*)
-	begin
-	    LoadBlanking <= (State == 8'h10);
-	    InBlanking   <= (State == 8'h35);
-		dac_trigger  <= (State == 8'h30 || State == 8'h60);
-		LoadInitial  <= (State == 8'h40);
-	end                       
+	reg [3:0] State;
+
+	initial
+		State = Idle;
+		
+	always @ (posedge Clock)
+		begin
+			case (State)
+				Idle: if (BeginBlanking == 1)   State <= SetLB; 
+					   else if (BeginRamp == 1) State <= LoadRamp;
+				
+				SetLB: State <= WaitDAC1;    
+				
+				WaitDAC1: begin if (dac_busy == 0) State <= LoadDAC1; end
+				
+				LoadDAC1: State <= SetIB;
+				
+				SetIB: begin InBlanking <= 1; State <= Idle; end
+				
+				LoadRamp: begin InBlanking <= 0; State <= WaitDAC2; end
+				
+				WaitDAC2: begin if (dac_busy == 0) State <= LoadDAC2; end	    
+				
+				LoadDAC2: if (RampDone == 1) State <= Idle; else State <= WaitCE;
+				
+				WaitCE: if (CountEnable == 1) State <= WaitDAC2;		    
+				
+				default: State <= Idle;
+			endcase
+		end
+		
+	always @ (*)
+		begin
+			LoadBlanking <= (State == SetLB);
+			dac_trigger  <= (State == LoadDAC1 || State == LoadDAC2);
+			LoadInitial  <= (State == LoadRamp);
+		end                       
 endmodule

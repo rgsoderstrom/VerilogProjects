@@ -6,68 +6,88 @@
 
 `timescale 1ns / 1ps
 
-module DAC1_DataGenerator (input Clock50MHz,
-                           input Blanking,
-                           input StartRamp,
-                           input dac_busy,
-                           output [9:0] DAC,
-                           output InBlanking,
-                           output Done,
-                           output dacTrigger);
+module DAC1_DataGenerator #(parameter DacWidth = 10)
+                           (input Clock50MHz,
+
+                            // DAC output level to turn off AD605
+							input [DacWidth-1:0] BlankingLevel, // = BlankingVoltage * CountsPerVolt;
+
+                            // DAC output level at beginning and end of TVG ramp														
+							input [DacWidth-1:0] RampStartingLevel,  // = InitialVoltage  * CountsPerVolt;                               
+							input [DacWidth-1:0] RampStoppingLevel,  // = FinalVoltage    * CountsPerVolt;
+							           
+							// set ramp rate                    
+							input [31:0] RampRateClkDivisor, // = 50e6 / RampRate;
                            
-    localparam BlankingVoltage = 0.025; // disable TVG amp
-    
-    localparam InitialVoltage  = 0.125; // minimum gain, for SONAR tests
-  //localparam InitialVoltage  = 0.5; // for A/D tests with signal generator
-
-    localparam FinalVoltage    = 1.325; // for maximum gain
-  //localparam FinalVoltage    = 0.5;   // for A/D tests with signal generator
-
-    localparam RiseTime        = 0.008; // seconds
-    localparam CountsPerVolt   = 1023 / 2.048; // DAC hardware characteristic
-
-    localparam BlankingCounts = BlankingVoltage * CountsPerVolt;
-    localparam InitialCounts  = InitialVoltage  * CountsPerVolt;                               
-    localparam FinalCounts    = FinalVoltage    * CountsPerVolt;                               
-    localparam RampRate       = (FinalCounts - InitialCounts) / RiseTime; // counts per second
-    localparam ClockDivisor   = 50e6 / RampRate;
-                                     
+                            input  BeginBlanking, // command to load BlankingLevel into DAC
+                            input  BeginRamp,     // command to start ramping up TVG
+                            output InBlanking,
+                            output [DacWidth-1:0] DAC,
+                            input                 dac_busy,
+                            output                dacTrigger);
+                           
+                             
     wire CountEnable;
     wire RampDone;
 
     wire LoadBlanking;
     wire LoadInitial;
+  //wire InBlanking;
     
-    wire [9:0] RampCount;
+    wire [DacWidth-1:0] RampCount;  //
     assign DAC = RampCount;
-    assign Done = RampDone;
     
     DAC1_Controller U1 (.Clock (Clock50MHz),
-                        .BeginBlanking (Blanking),
-                        .StartRamp     (StartRamp),
+                        .BeginBlanking (BeginBlanking),
+                        .BeginRamp     (BeginRamp),
                         .dac_busy      (dac_busy),
                         .CountEnable   (CountEnable),
-                        .InBlanking    (InBlanking),
-                        .RampDone      (RampDone),
+						.RampDone      (RampDone),
                         .dac_trigger   (dacTrigger),
+                        .InBlanking    (InBlanking),
                         .LoadBlanking  (LoadBlanking),
                         .LoadInitial   (LoadInitial));
 
-    ClockDivider #(.Divisor (ClockDivisor))
-        U2 (.FastClock (Clock50MHz),  
-            .Clear (0),  
-            .SlowClock (), 
-		    .Pulse (CountEnable));
+//*********************************************************************
 
-    RampCounter #(.BlankingLevel (BlankingCounts),
-                  .RampInitial (InitialCounts),
-                  .RampFinal (FinalCounts)) 
-              U3 (.Clock (Clock50MHz),
-                  .Clear (0),
+//    ClockDivider #(.Divisor (RampRateClkDivisor))
+//        U2 (.FastClock (Clock50MHz),  
+//            .Clear (1'b0),  
+//            .SlowClock (), 
+//		    .Pulse (CountEnable));
+		    
+    reg [31:0] Count;
+    reg Clear = 0;   // remove this if Clear input added
+           
+    initial
+        Count = 0;
+                
+	assign CountEnable = (Count == 0);
+	
+    always @ (posedge Clock50MHz) 
+        begin
+            if (Clear == 1'b1)
+                Count <= 0;
+            
+            else if (Count >= RampRateClkDivisor - 1)
+                Count <= 0;
+                
+            else
+                Count <= Count + 1'b1;
+        end
+		    
+//*********************************************************************		    
+		    		   
+    RampCounter #(.Width (DacWidth))
+              U3 (.BlankingLevel (BlankingLevel),
+                  .RampInitial   (RampStartingLevel),
+                  .RampFinal     (RampStoppingLevel), 
+                  .Clock        (Clock50MHz),
+                  .Clear        (1'b0),
                   .LoadBlanking (LoadBlanking),
                   .LoadInitial  (LoadInitial),
-                  .Enable (CountEnable),
-                  .RampDone (RampDone),
-                  .Ramp (RampCount));
+                  .Enable       (CountEnable),
+                  .RampDone     (RampDone),
+                  .Ramp         (RampCount));
                              
 endmodule

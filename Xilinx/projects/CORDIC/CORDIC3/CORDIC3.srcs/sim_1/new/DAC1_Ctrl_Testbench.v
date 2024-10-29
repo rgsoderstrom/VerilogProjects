@@ -53,7 +53,7 @@ module DAC1_Ctrl_Testbench;
                   .RampDone (RampDone),
                   .Ramp (RampCount));
                      
-    Mercury2_DAC_Sim_Wrapper #(.SettlingTime (1e-7))
+    Mercury2_DAC_Wrapper_Sim #(.SettlingTime (1e-7))
                      U4 (.clk_50MHZ (clk),        // -- 50MHz onboard oscillator
                          .trigger (dac_trigger),   // -- assert to write Din to DAC
                          .channel (1'b0),    // -- 0 = DAC0/A, 1 = DAC1/B
@@ -107,7 +107,7 @@ module DAC1_Ctrl_Testbench;
         #20  StartRamp = 0;
          
          
-     //   #3000 $finish;                   
+        #30000 $finish;                   
     end
 
 endmodule

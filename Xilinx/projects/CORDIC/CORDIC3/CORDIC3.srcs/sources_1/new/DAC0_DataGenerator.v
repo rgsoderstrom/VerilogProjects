@@ -6,17 +6,16 @@
 
 `timescale 1ns / 1ps
 
-module DAC0_DataGenerator #(parameter Width = 10,
-                                      RampIncr = 1,
-                                      WindowDuration = 15_000)  
-                           (input Clock50MHz,
-                            input StartPing,
-                            input dac_busy,
+module DAC0_DataGenerator #(parameter Width = 10)  
+                           (input  Clock50MHz,
+                            input  StartPing,
+                            input  dac_busy,
+                            input [15:0] Duration,   // in clocks, duration at max level
+                            input [15:0] Frequency,  // (FreqInHz / 190), see CORDIC.vhd
                             output dac_trigger,
                             output PingDone,
                             output [Width-1:0] PingWords);
                             
-    reg  [15:0] freq = 16'd215; // = freq / 190
     wire [11:0] cordicOut;
     wire [11:0] windowOut;
     wire [11:0] multiplierOut;
@@ -32,15 +31,15 @@ module DAC0_DataGenerator #(parameter Width = 10,
     assign PingWords = shiftAddOut [11:2];
 
     Mercury2_CORDIC
-        U1 (.clk_50MHz (Clock50MHz), .cor_en (1'b1), .phs_sft (freq), .outVal (cordicOut));
+        U1 (.clk_50MHz (Clock50MHz), .cor_en (1'b1), .phs_sft (Frequency), .outVal (cordicOut));
 
-    WindowGenerator #(.Width (12), .Duration (WindowDuration), .RampStep (RampIncr))
-                  U2 (.Clock   (Clock50MHz),
-                      .Clear   (1'b0),
-                      .Step    (1'b1),
-                      .Trigger (windowStart),
+    WindowGenerator #(.Width (12))
+                  U2 (.Clock50MHz (Clock50MHz),
+                      .Clear      (1'b0),
+                      .Trigger    (windowStart),
+                      .Duration   (Duration),
                       .WindowDone (windowDone),
-                      .Window  (windowOut));
+                      .Window     (windowOut));
         
     DAC0_Controller 
         U4 (.Clock50MHz  (Clock50MHz), 

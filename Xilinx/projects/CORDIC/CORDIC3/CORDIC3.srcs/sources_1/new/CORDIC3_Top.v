@@ -1,11 +1,14 @@
 /*
     CORDIC3_Top.v
-        - top-level architecture
+        - top-level module to drive SonarDAC on real hardware
 */
 
 `timescale 1ns / 1ps
 
 module CORDIC3_Top (input  Clock50MHz,
+
+                   // input PingTrigger, // for testbench only
+                      
                     output test_point1,
                   //output test_point2,
                     output dac_csn,
@@ -13,74 +16,53 @@ module CORDIC3_Top (input  Clock50MHz,
                     output dac_ldac,
                     output dac_sck);
 
-    wire PingTrigger;
-    wire startPing;
-    wire pingDone;
-	wire zeroRamp;
-	wire inBlanking;
-    wire startRamp;
-    wire rampDone;
-    wire dacBusy;
-    wire trigger0, trigger1, dacTrigger;
-    wire [9:0] DAC0;
-    wire [9:0] DAC1;
-    wire [9:0] Din;
-   wire dacMuxSelect;
-    
-    reg [19:0] BlankingDelayCntr; 
-    reg [7:0] State;
-    
-    localparam BlankingCounts = 50_000_000 * 0.001;
-  //localparam BlankingCounts = 5
-    
-  //assign test_point1 = PingTrigger;
-    assign test_point1 = pingDone;
-    
-    assign Din = (dacMuxSelect == 0 ? DAC0 : DAC1);
-    assign dacTrigger = trigger0 | trigger1;
-    
-    ClockDivider #(.Divisor (50_000_000 / 20)) // (clock freq) / PRF
- 			   U1 (.FastClock (Clock50MHz),  
-                   .Clear (1'b0),      
+	localparam DacWidth = 10;
+	localparam CountsPerVolt = 1023 / 2.048; // DAC characteristic
+	
+	localparam RampDur   = 0.020; // ramp duration, seconds
+	localparam BlankLvl  = 0.05 * CountsPerVolt;
+	localparam RStart    = 0.20 * CountsPerVolt;  
+	localparam RStop     = 1.75 * CountsPerVolt;	
+	
+	localparam RampRate  = (RStop - RStart) / RampDur; 
+	
+	
+    reg [15:0] WindowDuration = 50000;
+    reg [15:0] Frequency = 40800 / 190;
+	
+	reg [DacWidth-1:0] BlankingLevel		= BlankLvl;
+	reg [DacWidth-1:0] RampStartingLevel    = RStart;
+	reg [DacWidth-1:0] RampStoppingLevel    = RStop;
+	reg [31:0]         RampRateClockDivisor = 50e6 / RampRate;	
+ 
+	wire PingTrigger;    //      ----------- restore after TB
+	assign test_point1 = PingTrigger;
+	
+	SonarDAC 
+			U1 (.Clock50MHz  (Clock50MHz),                    
+                .BeginSequence (PingTrigger),
+                   
+                // DAC0 ping parameters 
+                .Frequency    (Frequency),                       
+                .PingDuration (WindowDuration),
+
+                // DAC1 TVG parameters 
+				.BlankingLevel        (BlankingLevel),		
+				.RampStartingLevel    (RampStartingLevel),   
+				.RampStoppingLevel    (RampStoppingLevel),    
+				.RampRateClockDivisor (RampRateClockDivisor),
+                  
+              //output test_point1,
+              //output test_point2,
+                .dac_csn  (dac_csn),
+                .dac_sdi  (dac_sdi),
+                .dac_ldac (dac_ldac),
+                .dac_sck  (dac_sck));
+
+	ClockDivider #(.Divisor (50_000_000 / 20))
+ 				  (.FastClock (Clock50MHz),  
+                   .Clear     (1'b0),  
                    .SlowClock (),  
-				   .Pulse (PingTrigger));
-   
-    DAC0_DataGenerator U2 (.Clock50MHz  (Clock50MHz),
-                           .StartPing   (startPing),
-                           .dac_busy    (dacBusy),
-                           .dac_trigger (trigger0),
-                           .PingDone    (pingDone),
-                           .PingWords   (DAC0));
-    
-    DAC1_DataGenerator U3 (.Clock50MHz (Clock50MHz),
-                           .Blanking   (zeroRamp),
-                           .InBlanking (inBlanking),
-                           .StartRamp  (startRamp),
-                           .dac_busy   (dacBusy),
-                           .DAC        (DAC1),
-                           .Done       (rampDone),
-                           .dacTrigger (trigger1));
-    
-    Mercury2_DAC_Wrapper
-  //Mercury2_DAC_Sim_Wrapper
-                 U4 (.clk_50MHZ (Clock50MHz), 
-                     .trigger   (dacTrigger),   
-                     .channel   (dacMuxSelect),   
-                     .Din       (Din), 
-                     .Busy      (dacBusy), 
-                     .dac_csn   (dac_csn),
-                     .dac_sdi   (dac_sdi), 
-                     .dac_ldac  (dac_ldac), 
-                     .dac_sck   (dac_sck)); 
-					 
-	CORDIC3_Controller U5 (.Clock50MHz    (Clock50MHz),
-						   .PingTrigger   (PingTrigger),
-						   .PingDone      (pingDone),
-						   .RampDone      (rampDone),
-						   .BeginSending  (startPing),
-                           .BeginBlanking (zeroRamp),
-                           .InBlanking    (inBlanking),
-                           .StartRamp     (startRamp),
-                           .dacMuxSelect  (dacMuxSelect));
-    
-endmodule
+				   .Pulse     (PingTrigger));
+
+endmodule				  

@@ -7,7 +7,7 @@
 module CORDIC3_Ctrl_Testbench;
 
     reg  clk;
-    reg  pingTrigger = 0;
+    reg  beginSequence = 0;
     reg  pingDone = 0; 
     reg  rampDone = 0;
     reg  inBlanking = 0;
@@ -18,7 +18,7 @@ module CORDIC3_Ctrl_Testbench;
     wire muxSelect;
     
     CORDIC3_Controller U1 (.Clock50MHz    (clk),
-						   .PingTrigger   (pingTrigger),
+						   .BeginSequence   (beginSequence),
 						   .PingDone      (pingDone),
 						   .RampDone      (rampDone),
 						   .InBlanking    (inBlanking),
@@ -50,8 +50,8 @@ module CORDIC3_Ctrl_Testbench;
     //
     initial
     begin
-        #132 pingTrigger = 1;
-        #20  pingTrigger = 0;
+        #132 beginSequence = 1;
+        #20  beginSequence = 0;
         
         #200 inBlanking = 1;
         #20  inBlanking = 0;
@@ -63,8 +63,8 @@ module CORDIC3_Ctrl_Testbench;
         #20  rampDone = 0;
 
 
-//        #200 pingTrigger = 1;
-//        #20  pingTrigger = 0;
+//        #200 beginSequence = 1;
+//        #20  beginSequence = 0;
         
 //        #200 inBlanking = 1;
 //        #20  inBlanking = 0;
