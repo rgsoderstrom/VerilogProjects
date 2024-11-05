@@ -15,7 +15,7 @@ module Mercury2_ADC_Sim (input  clock,         // -- 50MHz onboard oscillator
 reg [1:0] State = 0;
 reg [6:0] counter = 0;
 
-localparam Delay = 10; // 80; // ADC sets OutVal low for this many clocks after trigger - 1.4 uS
+localparam Delay = 80; // ADC sets OutVal low for this many clocks after trigger - 1.4 uS
 
 assign adc_mosi = 0;
 assign adc_cs   = 0;
