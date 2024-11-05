@@ -18,7 +18,6 @@ module SampleMsgSender  #(parameter SampleMsgID       = 200,
  				          input        ClearReadAddr, // was Prepare,     // assert once prior to a message set
 						  output       Ready,       // ready to send a message
 						  input        LoadAndSend, // load samples and send one message
-						//  output       AllSent,     // true when all sample data has been sent
 
 						  input [15:0] SeqNumber,
 

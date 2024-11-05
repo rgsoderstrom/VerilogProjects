@@ -85,9 +85,10 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits s
 	wire       			   SampleWrite;
 	wire                   DataMuxSel;
 	
-	wire [RamAddrBits-1:0] SampleReadAddr;
-	wire [15:0]            SampleReadData;
-	wire                   SampleRead;
+	// RAM byte interface to message sender
+	wire       ByteAddrClear;
+	wire [7:0] ByteReadData;
+	wire       SampleByteRead;
 	
 	// RAM word write address counter
 	wire    SampleWriteAddrWrapped;
@@ -101,7 +102,7 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits s
 	wire SendReadyMsg;
 	wire SendAllSentMsg;
   //wire ReadyMsgSent;
-	wire ClearReadAddr;
+  //wire ClearReadAddr;
 	wire SendSampleMsg;
   //wire SampleSenderReady;
   //wire AllSamplesSent;
@@ -201,37 +202,60 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits s
                       .RcvdMsgID       (MessageID),
                       .RcvdMsgComplete (MessageComplete),				      
                       .ADC_Valid          (ADC_Valid),
-                    //.AllSamplesSent     (AllSamplesSent),
-                    //.SampleMsgSent      (SampleSenderReady),
                       .SampleWriteAddrWrapped	  (SampleWriteAddrWrapped),                      
                       .SendReadyMsg	 	  (SendReadyMsg),  
                       .SendSamplesMsg	  (SendSampleMsg),
-                //      .SendAllSentMsg	  (SendAllSentMsg),					                        
                       .ADC_Trigger 		  (ADC_Trigger),
                       .ClearWriteAddr	  (ClearWriteAddr),
                       .IncrWriteAddr	  (IncrWriteAddr),
                       .SampleWrite 		  (SampleWrite),
                       .DataMuxSel		  (DataMuxSel),
                       .DAC_Trigger		  (DAC_Trigger),
-                  //  .ByteAddrClear	  (ByteAddrClear),
-                      .ClearReadAddr (ClearReadAddr),
+                      .ClearReadAddr      (ByteAddrClear),
                       .OutputMsgSelect    (OutputMsgSelect),
 					  .IncrSeqCntr        (IncrSeqNumber),
 					  .SampleClockDivisor (SampleClockDivisor));
      
+    
     DualPortRAM2 #(.AddrWidth (RamAddrBits)) 
                U7 (.Clk (Clock),
                    .ByteWriteData (8'h00),
-                   .ByteReadData  (),   // ByteReadData valid 3 clocks after ByteRead asserted
                    .ByteWrite     (1'b0),
-                   .ByteRead      (1'b0), 
-                   .ByteClearAddr (1'b0), 
+
+                   .ByteReadData  (ByteReadData),   // ByteReadData valid 3 clocks after ByteRead asserted
+                   .ByteRead      (SampleByteRead), 
+                   .ByteClearAddr (ByteAddrClear), 
+                   
                    .WordWriteData (SampleWriteData),
-                   .WordReadData  (SampleReadData),
                    .WordWriteAddr (SampleWriteAddr),
-                   .WordReadAddr  (SampleReadAddr),
                    .WordWrite     (SampleWrite),
-                   .WordRead      (SampleRead));
+
+                   .WordReadData  (),    
+                   .WordReadAddr  ('d0),
+                   .WordRead      (0));
+				   
+				   
+    SampleMsgSenderV3 #(.SampleMsgID      (SampleMsgID),
+				       .MaxSamplesPerMsg (MaxSamplesPerMsg),
+                       .AddrWidth        (RamAddrBits))  // SampleRAM has up to 2^AddrWidth samples to be send
+				  U14 (.Clock50MHz    (Clock),        
+ 				       .Clear         (Clear),					   
+				       .PrepareToSend (ByteAddrClear), // assert once prior to sending first msg of a batch
+					   .Ready         (),              // ready to send a message
+					   .Send          (SendSampleMsg), // load samples and send one message
+							 
+					   .SeqNumber (NextSeqNumber),
+							 
+					   .SampleByte     (ByteReadData), 
+					   .SampleByteRead (SampleByteRead),
+					   .SampleCount    (SampleCount), // total number to send
+						
+					   .P2S_Empty  (P2S_Empty), // output serializer ready to accept a byte
+					   .LoadByte   (P2SLoad1), 
+					   .MsgByteOut (SampleMsgByte));
+                                                     
+				   
+				   
 	 
     Mux2 #(.Width (16))
 		 U8 (.in0    (16'h0),        // write 0 to clear RAM
@@ -278,38 +302,6 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits s
                    .LoadByte  (P2SLoad0),
 				   .MsgByte   (RdyMsgByte));
                    
-//	HeaderMsgSender #(.MsgID (AllSentMsgID)) 
-//	          U13 (.Clock (Clock),
-//                   .Clear (Clear),                       
-//                   .Send  (SendAllSentMsg), 
-//                   .P2S_Empty (P2S_Empty),
-//                   .SeqNumber (NextSeqNumber),
-//                   .Ready     (),  //        ?????????????????????????? ready to send, to controller
-//                   .LoadByte  (P2SLoad2),
-//				   .MsgByte   (AllSentMsgByte));
-
-
-    SampleMsgSender #(.SampleMsgID      (SampleMsgID),
-				      .MaxSamplesPerMsg (MaxSamplesPerMsg),
-                      .AddrWidth        (RamAddrBits))  // SampleRAM has up to 2^AddrWidth samples to be send
-				  U14 (.Clock50MHz    (Clock),        
- 				       .Clear         (Clear),					   
-				       .ClearReadAddr (ClearReadAddr), // assert once prior to sending first msg of a batch
-					   .Ready         (), //SampleSenderReady),  // ready to send a message
-					   .LoadAndSend   (SendSampleMsg),      // load samples and send one message
-					//   .AllSent     (), // (AllSamplesSent),     // true when all sample data has been sent
-							 
-					   .SeqNumber (NextSeqNumber),
-							 
-					   .SampleWord     (SampleReadData), 
-					   .SampleReadAddr (SampleReadAddr),
-					   .SampleRead     (SampleRead),
-					   .SampleCount    (SampleCount), // total number to send
-						
-					   .P2S_Empty  (P2S_Empty), // output serializer can accept a byte
-					   .LoadByte   (P2SLoad1), 
-					   .MsgByteOut (SampleMsgByte));
-                                                     
   //Mercury2_ADC_Sim 
     Mercury2_ADC 
 				U15	(.clock   (Clock),
