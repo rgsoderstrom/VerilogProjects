@@ -64,6 +64,7 @@ assign MessageID      = {Memory [MsgIdHighByte],     Memory [MsgIdLowByte]};
 assign ByteCount      = {Memory [ByteCountHighByte], Memory [ByteCountLowByte]};
 assign SequenceNumber = {Memory [SeqNumbHighByte],   Memory [SeqNumbLowByte]};
 
+wire HeaderOnlyMsg;
 assign HeaderOnlyMsg = (ByteCount == HeaderByteCount);
 
 always @ (posedge Clock)

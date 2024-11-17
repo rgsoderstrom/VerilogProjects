@@ -17,16 +17,12 @@ module ArduinoSerial (input Clock,
 					  input        LoadOutputByte,
 					  output       P2S_Empty,
 					
-					// sequence number
-					  output [15:0] NextSeqNumber, // to all Message Builders
-					  input         IncrSeqNumber, // logical "or" of all SendMsg commands
-					  
-				    // input bits from Arduino, connected to IO pins
+				    // input bits from Arduino. These are connected to IO pins
                       input InputBit,
                       input InputBitShiftClock,
                       input InputByteDone,
                       					   
-				    // output bits to Arduino, connected to IO pins
+				    // output bits to Arduino. These are connected to FPGA IO pins
                       output OutputBit,
                       input  OutputBitShiftClock,
                       output LastBit,
@@ -36,20 +32,6 @@ module ArduinoSerial (input Clock,
     wire SInputByteDone;
     wire SOutputBitShiftClock;
     
-	//************************************************************************
-	
-	reg SeqNumberCounter = 0;
-	
-	always @(posedge Clock) begin
-		if (Clear == 1)
-			SeqNumberCounter = 0;
-
-		else if (IncrSeqNumber == 1)
-			SeqNumberCounter = SeqNumberCounter + 1;
-	end
-	
-	assign NextSeqNumber = SeqNumberCounter + 1;
-	
 	//************************************************************************
 	
 	SyncOneShot U1 (.trigger (InputBitShiftClock),  .clk (Clock), .clr (0/*Clear*/), .Q (SInputBitShiftClock)),
@@ -66,7 +48,7 @@ module ArduinoSerial (input Clock,
                     .DataOut (InputByte));			
 			   
    	SerializerPtoS #(.Width (8))
-                U5 (.Input (OutputMsgByte),
+                U5 (.Input (OutputByte),
                     .Clr   (Clear),
                     .Clk   (Clock),
                     .Load  (LoadOutputByte),

@@ -27,9 +27,11 @@ module MsgRouter2 #(parameter ID1 = 16'd101,
 					
 				    output reg ClearMsg1,
 				    output reg WriteMsg1, 
+				    output reg Msg1Complete, 
 					
 				    output reg ClearMsg2,
-				    output reg WriteMsg2);
+				    output reg WriteMsg2,
+					output reg Msg2Complete);
 
 	wire ClearAddr;
 	wire WriteData;
@@ -47,10 +49,13 @@ module MsgRouter2 #(parameter ID1 = 16'd101,
 
     always @(posedge Clock)
     begin
-        ClearMsg1 = ClearAddr & (MessageID == ID1);
-        WriteMsg1 = WriteData & (MessageID == ID1);
-        ClearMsg2 = ClearAddr & (MessageID == ID2);
-        WriteMsg2 = WriteData & (MessageID == ID2);
+        ClearMsg1    <= ClearAddr       & (MessageID == ID1);
+        WriteMsg1    <= WriteData       & (MessageID == ID1);
+		Msg1Complete <= MessageComplete & (MessageID == ID1);
+		
+        ClearMsg2    <= ClearAddr       & (MessageID == ID2);
+        WriteMsg2    <= WriteData       & (MessageID == ID2);
+		Msg2Complete <= MessageComplete & (MessageID == ID2);
     end
     
 endmodule

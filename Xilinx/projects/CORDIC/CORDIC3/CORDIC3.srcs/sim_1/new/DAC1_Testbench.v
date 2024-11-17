@@ -70,7 +70,7 @@ module DAC1_Testbench;
     begin
         $display ("module: %m");
 //        $display ("U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input");
-//        $monitor($time, ": DATA: %d, %d, %d, %d, %d", U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input); 
+        $monitor($time, ": BeginBlanking %d, BeginRamp %d, RampDone %d", beginBlanking, beginRamp, DataGen.RampDone); 
 
         clk = 1'b0;
     end
@@ -86,31 +86,20 @@ module DAC1_Testbench;
     //
     initial
     begin
-        #123
-            beginBlanking = 1;
-        
-        #20
-            beginBlanking = 0;
-            
-        #1000
-            beginRamp = 1;
-        
-        #20
-            beginRamp = 0;
+        #123  beginBlanking = 1;        
+        #20   beginBlanking = 0;            
+        #1000 beginRamp = 1;        
+        #20   beginRamp = 0;
 
 
-        #20_000_000      
-            ClockDivisor = ClockDivisor / 2;  
-            beginBlanking = 1;
+//        #20_000_000      
+//            ClockDivisor = ClockDivisor / 2;  
+//            beginBlanking = 1;
         
-        #20
-            beginBlanking = 0;
-            
-        #1000
-            beginRamp = 1;
-        
-        #20
-            beginRamp = 0;
+        #100  beginBlanking = 1;        
+        #20   beginBlanking = 0;            
+        #1000 beginRamp = 1;        
+        #20   beginRamp = 0;
         
        #20_000_000
             $finish;

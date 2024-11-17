@@ -85,7 +85,7 @@ module SampleMsgSenderV3 #(parameter SampleMsgID       = 200,
                   .P2SLoad         (LoadByte),
                   .P2SEmpty        (P2S_Empty),
 				  .DataByte        (MsgDataByte),
-                  .ClearDataAddr   (ByteAddrClear),
+                  .ClearDataAddr   (),
                   .RamRead         (ByteReadCycle));
 
 	MsgHeaderGen #(.ID (SampleMsgID), .ByteCount (8 + 2 + 2 * MaxSamplesPerMsg))

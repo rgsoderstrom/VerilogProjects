@@ -175,8 +175,10 @@ module Merc2ADC_Test3 # (parameter RamAddrBits = 12,        // 2 ^ RamAddrBits s
 				 .DataByte        (MessageByte),
 				 .ClearMsg1       (ClearByteAddr1), // gain
 				 .WriteMsg1       (WriteByte1),
+				 .Msg1Complete    (),
 				 .ClearMsg2       (ClearByteAddr2), // sample rate
-				 .WriteMsg2       (WriteByte2));
+				 .WriteMsg2       (WriteByte2),
+				 .Msg2Complete    ());
 				 
 				 // Message word
 	MessageWord #(.BytesPerWord (2), 
