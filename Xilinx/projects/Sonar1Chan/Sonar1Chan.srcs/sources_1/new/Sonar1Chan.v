@@ -6,7 +6,8 @@
 `timescale 1ns / 1ps
 
 module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits) samples collected
-                    parameter MaxSamplesPerMsg = 256)
+                    parameter MaxSamplesPerMsg = 256,
+					parameter ResetCount = 50_000_000)
 				   (input Clock50MHz,
 			  	    input ClearBar,
 					   
@@ -47,7 +48,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 	//*************************************************************************
 
 	// power-on reset
-	localparam ResetCount = 50_000_000;
+	
 	wire Clear;
 
     PowerOnReset #(.Count (ResetCount))
