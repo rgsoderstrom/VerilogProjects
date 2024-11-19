@@ -46,6 +46,11 @@ module SonarADC1_Controller (input Clock50MHz,
 
 	reg [5:0] state = Start;
 	
+	initial	begin
+	   Busy <= 0;
+	   DataMuxSel <= 0;
+	end
+	
 	//*************************************************************************
 	//
 	// SampleClockGenerator - generate pulses at sampling freq Fs

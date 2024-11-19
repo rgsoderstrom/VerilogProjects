@@ -34,9 +34,9 @@ module ArduinoSerial (input Clock,
     
 	//************************************************************************
 	
-	SyncOneShot U1 (.trigger (InputBitShiftClock),  .clk (Clock), .clr (0/*Clear*/), .Q (SInputBitShiftClock)),
-	            U2 (.trigger (InputByteDone),       .clk (Clock), .clr (0/*Clear*/), .Q (SInputByteDone)),
-	            U3 (.trigger (OutputBitShiftClock), .clk (Clock), .clr (0/*Clear*/), .Q (SOutputBitShiftClock));
+	SyncOneShot U1 (.trigger (InputBitShiftClock),  .clk (Clock), .clr (1'b0/*Clear*/), .Q (SInputBitShiftClock)),
+	            U2 (.trigger (InputByteDone),       .clk (Clock), .clr (1'b0/*Clear*/), .Q (SInputByteDone)),
+	            U3 (.trigger (OutputBitShiftClock), .clk (Clock), .clr (1'b0/*Clear*/), .Q (SOutputBitShiftClock));
 			
 	SerializerStoP #(.Width (8)) 
                 U4 (.DataIn  (InputBit),

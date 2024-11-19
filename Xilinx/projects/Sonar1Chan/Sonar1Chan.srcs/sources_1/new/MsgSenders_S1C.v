@@ -7,8 +7,8 @@
 
 module MsgSenders_S1C #(parameter AddrWidth        = 10,
 						parameter MaxSamplesPerMsg = 256,
-                        parameter RdyMsgID    = 100,
-						parameter SampleMsgID = 101)
+                        parameter RdyMsgID    = 201,
+						parameter SampleMsgID = 200)
                       (input Clock,
                        input Clear,
                        

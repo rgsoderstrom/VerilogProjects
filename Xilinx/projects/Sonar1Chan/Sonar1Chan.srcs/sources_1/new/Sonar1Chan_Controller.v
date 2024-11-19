@@ -9,7 +9,7 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 							   parameter SendSamplesID       = 'd102,
 							   parameter ParametersID        = 'd103)
 							 (input Clock50MHz,
-						   // input Clear,
+						      input Clear,
 							  
 							// message router
 							  input InputMsgComplete,
@@ -26,23 +26,29 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 							  output reg BeginSampling,
 							  
 						    // SonarDAC
+						      input      RampBeginning,
 							  output reg BeginPingSequence);
 
-	localparam PowerOn       = 'd0;
-	localparam SendReady     = 'd1;
-	localparam Idle          = 'd2;
-	localparam MsgSwitch     = 'd3;
-	localparam ClearSamples  = 'd4;
-	localparam Wait1         = 'd5;
-	localparam Wait2         = 'd6;
-	localparam Prepare       = 'd7;
+	localparam PowerOn      = 'd0;
+	localparam SendReady    = 'd1;
+	localparam Idle         = 'd2;
+	localparam MsgSwitch    = 'd3;
+	localparam ClearSamples = 'd4;
+	localparam Wait1        = 'd5;
+	localparam Wait2        = 'd6;
+	localparam Prepare      = 'd7;
 	localparam BeginPing    = 'd8;
-	localparam Send          = 'd9;
+	localparam Wait3        = 'd9;
+	localparam StartADC     = 'd10;
+	localparam Send         = 'd11;
 	
 	reg [3:0] state = PowerOn;
 	
 	always @ (posedge Clock50MHz) begin
-		case (state)
+	   if (Clear == 1)
+	       state <= SendReady;
+	   else
+		 case (state)
 		    PowerOn:   state <= Idle;
 			SendReady: state <= Idle;
 			
@@ -62,20 +68,22 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 			
 			Prepare: state <= SendReady;
 			
-			BeginPing: state <= Wait1;
+			BeginPing: state <= Wait3;
+			Wait3:     if (RampBeginning == 1) state <= StartADC;
+			StartADC:  state <= Wait1;
 			
 			Send: state <= Idle;
 			
 			default: state <= Idle;
-		endcase
+		  endcase
 	end
 	
 	always @ (*) begin
 		SendRdyMsg    <= (state == SendReady);	
-		SendSampleMsg <= (state == BeginSampling);	
+		SendSampleMsg <= (state == Send);	
 		SampleMsgPrep <= (state == Prepare);
 		ClearSampleBuffer <= (state == ClearSamples);	
-		BeginSampling     <= (state == BeginPing); 
+	    BeginSampling     <= (state == StartADC); 
 		BeginPingSequence <= (state == BeginPing); 
 	end
 

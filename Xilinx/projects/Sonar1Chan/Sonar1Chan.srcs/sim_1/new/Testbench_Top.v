@@ -28,7 +28,7 @@ module Testbench_Top;
 
     Sonar1Chan #(.RamAddrBits (6), 
                  .MaxSamplesPerMsg (20), //(16), // doesn't have to be a power of 2
-                 .ResetCount (5))
+                 .ResetCount (50))
 				U1 (.Clock50MHz (Clock),        
 			  	    .ClearBar (ClearBar),
 					   
@@ -93,30 +93,29 @@ module Testbench_Top;
 		
     initial
     begin
-		#20_000 
+		#50_000 
 		
 		//******************************************
 		//
 		// Clear - send ClearSampleBufferMsg 
 		//
-        for (j=0; j<8; j=j+1) // 8 bytes
-        begin
-			for (i=0; i<8; i=i+1) // 8 bits per byte
-			  begin
-				#10 inputDataBit <= M1 [j][7-i];                    
-				#10 inputShiftClock <= 1'b1;
-				#50 inputShiftClock <= 1'b0;
-			  end
+//        for (j=0; j<8; j=j+1) // 8 bytes
+//        begin
+//			for (i=0; i<8; i=i+1) // 8 bits per byte
+//			  begin
+//				#10 inputDataBit <= M1 [j][7-i];                    
+//				#10 inputShiftClock <= 1'b1;
+//				#50 inputShiftClock <= 1'b0;
+//			  end
 		
-			  #10 inputByteReady <= 1;
-			  #20 inputByteReady <= 0;
-        end
-
+//			  #10 inputByteReady <= 1;
+//			  #20 inputByteReady <= 0;
+//        end
         
         //
-        // Collect - send BeginSamplingMsg
+        // Ping - send Ping message
         //
-        #25_000
+//        #25_000
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
 			for (i=0; i<8; i=i+1) // 8 bits per byte
@@ -130,14 +129,16 @@ module Testbench_Top;
 			  #20 inputByteReady <= 0;
         end
 
+        #10_000_000 // $finish;
+
 
 
         //
         // Send - SendSamples message
         //
-        for (p=0; p<4; p=p+1) // send the "send" message this many times
+        for (p=0; p<2; p=p+1) // send the "send" message this many times
         begin        
-            #120000        
+            #120_000        
             for (j=0; j<8; j=j+1) // 8 bytes
             begin
                 for (i=0; i<8; i=i+1) // 8 bits per byte
@@ -150,9 +151,9 @@ module Testbench_Top;
                   #10 inputByteReady <= 1;
                   #20 inputByteReady <= 0;
             end
-        end
-        
-     end
+        end        
+
+    end
 	 
 	//*****************************************************
 	//*****************************************************

@@ -86,6 +86,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
     wire SendSampleMsg;
     wire SampleMsgPrep;
     wire BeginPingSequence;
+    wire RampBeginning;
     wire ClearSampleBuffer;
     wire BeginSampling;
     wire ADC_Busy;
@@ -168,6 +169,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 
     SonarDAC U5 (.Clock50MHz (Clock50MHz), 	               
 				 .BeginSequence (BeginPingSequence),
+				 .RampBeginning (RampBeginning),
                  .Frequency     (PingFrequency),
 				 .PingDuration  (PingDuration),
 				 .BlankingLevel        (BlankingLevel     [DacWidth-1:0]),
@@ -186,7 +188,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 							.SendSamplesID       (SendSamplesID),
 							.ParametersID        (ParametersID))
 						U6 (.Clock50MHz (Clock50MHz),
-						  //.Clear      (Clear),
+						    .Clear      (Clear),
 							.InputMsgComplete  (InputMsgComplete),
 							.InputMsgID        (InputMsgID),
 							.SendRdyMsg        (SendRdyMsg),
@@ -195,7 +197,8 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 							.ADC_Busy          (ADC_Busy),
 							.ClearSampleBuffer (ClearSampleBuffer),
 							.BeginSampling     (BeginSampling),
-							.BeginPingSequence (BeginPingSequence));
+							.BeginPingSequence (BeginPingSequence),
+							.RampBeginning     (RampBeginning));
 
 	//*************************************************************************************
 

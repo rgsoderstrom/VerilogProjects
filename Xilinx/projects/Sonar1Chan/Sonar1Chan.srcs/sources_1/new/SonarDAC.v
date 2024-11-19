@@ -8,7 +8,8 @@
 module SonarDAC #(parameter DacWidth = 10)
                  (input Clock50MHz,
                     
-                  input BeginSequence,
+                  input  BeginSequence,
+				  output RampBeginning,
                      
                   // DAC0 ping parameters 
                   input [15:0] Frequency,                       
@@ -41,6 +42,8 @@ module SonarDAC #(parameter DacWidth = 10)
     wire [DacWidth-1:0] Din;
     wire dacMuxSelect;
     
+	assign RampBeginning = beginRamp;
+	
   //assign test_point1 = BeginSequence;
   //assign test_point1 = pingDone;
     
@@ -70,8 +73,8 @@ module SonarDAC #(parameter DacWidth = 10)
                            .dac_busy    (dacBusy),
                            .dac_trigger (trigger1));
     
-    Mercury2_DAC_Wrapper
   //Mercury2_DAC_Wrapper_Sim
+    Mercury2_DAC_Wrapper
                  U4 (.clk_50MHZ (Clock50MHz), 
                      .trigger   (dacTrigger),   
                      .channel   (dacMuxSelect),   
