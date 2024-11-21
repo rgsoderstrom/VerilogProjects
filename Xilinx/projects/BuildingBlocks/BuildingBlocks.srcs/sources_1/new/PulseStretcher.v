@@ -4,7 +4,7 @@
 
 `timescale 1ns / 1ps
 
-module PulseStretcher #(parameter Count = 25_000_000)
+module PulseStretcher #(parameter Count = 500_000)
                        (input Clock50MHz,
                         input trigger,
                         output extended);

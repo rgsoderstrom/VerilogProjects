@@ -20,8 +20,8 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
                     output LastBit,
                     output FirstBit,
                          
-                    //output TP39,
-                    //output TP38,
+                    output TP39,
+                    output TP38,
                     //output TP37,
                     //output TP36,
                        
@@ -53,7 +53,23 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 
     PowerOnReset #(.Count (ResetCount))
                U100 (.Clock50MHz (Clock50MHz), .ClearBar (ClearBar), .Clear (Clear));
-               
+			   
+    // generate 10Hz ping trigger for initial tests
+	wire PingTrigger;
+	
+	assign PingTrigger = 0;
+	
+	ClockDivider #(.Divisor (50_000_000 / 10))
+ 			 U200 (.FastClock (Clock50MHz),  
+                   .Clear (1'b0),
+                   .SlowClock (),
+				   .Pulse ()); // (PingTrigger));     // single pulse at SlowClock rate
+
+	// stretch ping trigger for easier display
+	PulseStretcher U201 (.Clock50MHz (Clock50MHz),
+                         .trigger    (PingTrigger),
+                         .extended   (TP39));
+
 	//*************************************************************************
 
 	localparam DacWidth = 10;
@@ -94,6 +110,8 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
     wire [7:0]           SampleByteData;
     wire                 SampleByteRead;
     wire [RamAddrBits:0] SampleCount; // one more than RAM address width
+	
+	assign TP38 = ADC_Busy;
     
 	//*************************************************************************************
 
@@ -189,6 +207,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 							.ParametersID        (ParametersID))
 						U6 (.Clock50MHz (Clock50MHz),
 						    .Clear      (Clear),
+							.ForcePing  (PingTrigger),
 							.InputMsgComplete  (InputMsgComplete),
 							.InputMsgID        (InputMsgID),
 							.SendRdyMsg        (SendRdyMsg),

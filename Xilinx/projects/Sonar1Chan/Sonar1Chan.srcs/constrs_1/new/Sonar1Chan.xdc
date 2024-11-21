@@ -29,8 +29,8 @@ set_property -dict {PACKAGE_PIN H2 IOSTANDARD LVCMOS33} [get_ports {ClearBar}]
 # was io [36] - [39]
 #set_property -dict {PACKAGE_PIN K1 IOSTANDARD LVCMOS33} [get_ports {TP36}]
 #set_property -dict {PACKAGE_PIN K2 IOSTANDARD LVCMOS33} [get_ports {TP37}]
-#set_property -dict {PACKAGE_PIN J1 IOSTANDARD LVCMOS33} [get_ports {TP38}]
-#set_property -dict {PACKAGE_PIN J3 IOSTANDARD LVCMOS33} [get_ports {TP39}]
+set_property -dict {PACKAGE_PIN J1 IOSTANDARD LVCMOS33} [get_ports {TP38}]
+set_property -dict {PACKAGE_PIN J3 IOSTANDARD LVCMOS33} [get_ports {TP39}]
 
 
 # DAC interface

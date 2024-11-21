@@ -26,6 +26,7 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 							  output reg BeginSampling,
 							  
 						    // SonarDAC
+							  input      ForcePing,   // for test & debug
 						      input      RampBeginning,
 							  output reg BeginPingSequence);
 
@@ -47,6 +48,10 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 	always @ (posedge Clock50MHz) begin
 	   if (Clear == 1)
 	       state <= SendReady;
+		   
+	   else if (ForcePing == 1)
+		   state <= BeginPing;
+		   
 	   else
 		 case (state)
 		    PowerOn:   state <= Idle;
