@@ -4,24 +4,24 @@
 
 `timescale 1ns / 1ps
 
-module ADC3_Controller //#(parameter ClockFreq = 50_000_000, 
-                       //  parameter Fs = 19150) // sampling frequency
+module ADC3_Controller #(parameter ClearSamplesID  = 16'd150,
+                         parameter BeginSamplingID = 16'd251,
+                         parameter SendSamplesID   = 16'd151,
+                         parameter SetGainID       = 16'd252,      
+                         parameter SetSampleRateID = 16'd253)
                        (input Clock,        
 				        input Clear,
 
                         input [15:0] RcvdMsgID,
                         input        RcvdMsgComplete,
 						
-						input [15:0] SampleClockDivisor,  //***********************************
+						input [15:0] SampleClockDivisor, 
                         				        
                         input ADC_Valid,
-                //        input AllSamplesSent,
-                 //       input SampleMsgSent,
                         input SampleWriteAddrWrapped,
                         
                         output reg SendReadyMsg,    // to message generators
                         output reg SendSamplesMsg,
-                     //   output reg SendAllSentMsg,
                         
                         output reg ADC_Trigger,
                         output reg ClearWriteAddr,
@@ -60,13 +60,8 @@ module ADC3_Controller //#(parameter ClockFreq = 50_000_000,
     localparam TestWriteAddr2A = 'd25;
     localparam SamplingOff2    = 'd26;
     localparam SamplingOff2A   = 'd27;
-
-
     
     localparam SendSampleMsg3  = 'd28;
-//    localparam WaitForMsgSent3 = 5'd19;
-//    localparam TestAllSent3    = 5'd20;
- //   localparam SendAllSentMsg3 = 5'd21;
 	
     localparam SetSampleRate1 = 'd29;
     localparam SetSampleRate2 = 'd30;
@@ -77,12 +72,12 @@ module ADC3_Controller //#(parameter ClockFreq = 50_000_000,
         OutputMsgSelect <= 2'b00;
     end
     
-    wire ClearSampleBuffer = (RcvdMsgID == 16'd100) && (RcvdMsgComplete == 1);
-    wire BeginSampling     = (RcvdMsgID == 16'd101) && (RcvdMsgComplete == 1);
-    wire SendSamples       = (RcvdMsgID == 16'd102) && (RcvdMsgComplete == 1);
-    wire SetGain           = (RcvdMsgID == 16'd103) && (RcvdMsgComplete == 1);
-    wire SetSampleRate     = (RcvdMsgID == 16'd104) && (RcvdMsgComplete == 1);
-    
+    wire ClearSampleBuffer = (RcvdMsgID == ClearSamplesID)  && (RcvdMsgComplete == 1);
+    wire BeginSampling     = (RcvdMsgID == BeginSamplingID) && (RcvdMsgComplete == 1);
+    wire SendSamples       = (RcvdMsgID == SendSamplesID)   && (RcvdMsgComplete == 1);
+    wire SetGain           = (RcvdMsgID == SetGainID)       && (RcvdMsgComplete == 1);
+    wire SetSampleRate     = (RcvdMsgID == SetSampleRateID) && (RcvdMsgComplete == 1);
+	
 	//*************************************************************************
 	//
 	// SampleClockGenerator - generate pulses at sampling freq Fs
@@ -163,9 +158,6 @@ module ADC3_Controller //#(parameter ClockFreq = 50_000_000,
 				// Send Samples
 				//
 				SendSampleMsg3:  begin OutputMsgSelect <= 2'h1; state <= Idle; end
-//				WaitForMsgSent3: if (SampleMsgSent == 1) state <= TestAllSent3;
-//				TestAllSent3:    /*if (AllSamplesSent == 1) state <= SendAllSentMsg3; else*/ state <= Idle;
-//			//	SendAllSentMsg3: begin OutputMsgSelect <= 2'h2; state <= Idle; end
 				
 				//
 				// Set Gain
@@ -188,10 +180,8 @@ module ADC3_Controller //#(parameter ClockFreq = 50_000_000,
 		ClearReadAddr      <= (state == Init1)  || (state == Init2);		
 		SampleWrite        <= (state == Write1) || (state == Write2);		
 		IncrWriteAddr      <= (state == NextWriteAddr1) || (state == NextWriteAddr2);
-		
-		
+				
 		SendSamplesMsg     <= (state == SendSampleMsg3);
-
 		SendReadyMsg       <= (state == SendReady);
 		
 		IncrSeqCntr <= SendReadyMsg || (state == SendSampleMsg3);
