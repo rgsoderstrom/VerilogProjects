@@ -36,14 +36,14 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
                     output dac_sck);
 					
 	// msgs received from PC via Arduino
-	localparam ClearSampleBufferID = 'd100;
-	localparam BeginSamplingID     = 'd101;
-	localparam SendSamplesID       = 'd102;
-	localparam ParametersID        = 'd103;
+	localparam ClearSampleBufferID = 'd150;
+	localparam BeginSamplingID     = 'd351;
+	localparam SendSamplesID       = 'd151;
+	localparam ParametersID        = 'd352;
 	
 	// msgs sent to PC via Arduino
-	localparam RdyMsgID    = 'd200;	
-	localparam SampleMsgID = 'd201;					
+	localparam RdyMsgID    = 'd100;	
+	localparam SampleMsgID = 'd301;					
 
 	//*************************************************************************
 
@@ -63,7 +63,8 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
  			 U200 (.FastClock (Clock50MHz),  
                    .Clear (1'b0),
                    .SlowClock (),
-				   .Pulse ()); // (PingTrigger));     // single pulse at SlowClock rate
+				 //.Pulse (PingTrigger)); // single pulse at SlowClock rate
+				   .Pulse ()); 
 
 	// stretch ping trigger for easier display
 	PulseStretcher U201 (.Clock50MHz (Clock50MHz),
