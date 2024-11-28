@@ -13,14 +13,17 @@ module Window_Testbench;
     reg  clk;
     reg  clr;
     reg  trigger = 0;
+    reg  [15:0] duration = 'd12_500;
     wire [11:0] window;
+    wire        done;
                         
-    WindowGenerator // #(.Width (4), .Duration (12))
-                  U1 (.Clock (clk),
-                      .Clear (clr),
-                      .Trigger (trigger),
-                      .Step (1'b1),
-                      .Window (window));
+    WindowGenerator //#(.Width (12))      // bits. Default of 12 matches CORDIC                                                                      
+                    U1 (.Clock50MHz (clk),
+                        .Clear (clr),
+                        .Trigger (trigger),
+                        .Duration (duration),    // time at max level, clocks
+                        .WindowDone (done),
+                        .Window (window));
 
     //
     // test bench initializations
@@ -53,7 +56,7 @@ module Window_Testbench;
 //        #835 trigger = 1'b1;
 //        #10  trigger = 1'b0;
          
-  //      #2000 $finish;                   
+        #3_000_000 $finish;                   
     end
         
 endmodule

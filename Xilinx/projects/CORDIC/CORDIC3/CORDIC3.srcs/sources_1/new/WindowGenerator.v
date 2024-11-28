@@ -13,7 +13,7 @@ module WindowGenerator #(parameter Width = 12)      // bits. Default of 12 match
                          output reg WindowDone,
                          output [Width-1:0] Window);
                          
-    localparam MaxRampCount = 12'hbff; // (1 << Width) - 1;
+    localparam MaxRampCount = 12'h3ff; // (1 << Width) - 1;
     localparam RampStep = 1;
                                  
     reg [Width-1:0] RampCounter; // counts clocks during transitions
