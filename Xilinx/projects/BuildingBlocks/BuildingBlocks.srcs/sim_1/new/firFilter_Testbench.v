@@ -7,58 +7,70 @@
 
 module firFilter_Testbench;
 
-    localparam DataWidth = 10;
+    localparam ClockFreq  = 50_000_000;
+    localparam SampleRate = 25_000; // samples per second
+    localparam SignalFreq =  2_500; // Hz 
+
+    localparam CordicDataWidth  = 12;
+    localparam SignedDataWidth  = 16;
+    localparam FractionBits     = 10;
     
-	reg  clk = 0;
+	
+	reg  Clock50MHz = 0;
 	reg  clr = 0;
 	wire ready;
-	reg  load = 0;
-	wire sLoad;
-    reg  signed [DataWidth-1:0] inputData = 0; // -1 * 10'd5; // 10'h3f6;
-    wire signed [DataWidth-1:0] filteredData;
     
-    reg signed [DataWidth-1:0] SineTable [0:24];
-    reg [4:0] TableIndex = 0;
-     
-    initial
-    begin
-        SineTable [0]  = 10'h000;  
-        SineTable [1]  = 10'h07f;  
-        SineTable [2]  = 10'h0f6;  
-        SineTable [3]  = 10'h15e;  
-        SineTable [4]  = 10'h1b0;  
-        SineTable [5]  = 10'h1e6;  
-        SineTable [6]  = 10'h1fe;  
-        SineTable [7]  = 10'h1f6;  
-        SineTable [8]  = 10'h1cf;  
-        SineTable [9]  = 10'h18a;  
-        SineTable [10] = 10'h12c;  
-        SineTable [11] = 10'h0bc;  
-        SineTable [12] = 10'h040;  
-        SineTable [13] = 10'h3c0;  
-        SineTable [14] = 10'h344;  
-        SineTable [15] = 10'h2d4;  
-        SineTable [16] = 10'h276;  
-        SineTable [17] = 10'h231;  
-        SineTable [18] = 10'h20a;  
-        SineTable [19] = 10'h202;  
-        SineTable [20] = 10'h21a;  
-        SineTable [21] = 10'h250;  
-        SineTable [22] = 10'h2a2;  
-        SineTable [23] = 10'h30a;  
-        SineTable [24] = 10'h381;  
-    end
+    //***********************************************************************
+    
+    reg [15:0] frequency = SignalFreq / 190;
 
-    SyncOneShot U1 (.trigger (load), .clk (clk), .clr (clr), .Q (sLoad));
+    // signal oscillator. Unsigned right out of CORDIC. Converted to signed for subsequent operations
+    wire        [CordicDataWidth-1:0] unsigned_Signal;
+    wire signed [SignedDataWidth-1:0] signed_Signal;
+    wire signed [SignedDataWidth-1:0] filteredData;
+    
+	
+  //assign signed_Signal [FractBits-1:0] = unsigned_Signal [CordicDataWidth-1 -: FractionBits];
+    assign signed_Signal [8:0] = unsigned_Signal [10:2];
+	
+    assign signed_Signal [15] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [14] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [13] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [12] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [11] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [10] = unsigned_Signal [11] ^ 1'b1;    
+    assign signed_Signal [9]  = unsigned_Signal [11] ^ 1'b1;    
+	
+	
+	
+	
+    
+    reg signed [15:0] Sample;
+    wire              SampleClock;
+    
+    ClockDivider #(.Divisor (ClockFreq / SampleRate))
+ 			   U1 (.FastClock (Clock50MHz),  
+                   .Clear     (clr),
+                   .SlowClock (),
+				   .Pulse     (SampleClock));     // single pulse at SlowClock rate
+	
+	always @ (posedge Clock50MHz)
+	   if (SampleClock == 1)
+	       Sample <= signed_Signal;
+	       			   
+    //***********************************************************************
+
+    Mercury2_CORDIC
+        U2 (.clk_50MHz (Clock50MHz), .cor_en (1'b1), .phs_sft (frequency),  .outVal (unsigned_Signal));
         
-    firFilter1 #(.DataWidth (DataWidth))
-            U2  (.Clock (clk),
+    firFilter2 //#(.DataWidth (SignedDataWidth))
+            U3  (.Clock (Clock50MHz),
                  .Clear (clr),
                  .Ready (ready),
-                 .Load (sLoad),
-                 .InputData (inputData),  
+                 .Load  (SampleClock),
+                 .InputData    (Sample),  
                  .FilteredData (filteredData));
-
+    
     //
     // test bench initializations
     //    
@@ -68,8 +80,8 @@ module firFilter_Testbench;
         $display ("module: %m");
         //$monitor ($time, " EventCounter.Count = %d, EventCounter.Zero = %d", U1.Count, U1.Zero);
         
-        clk   = 1'b0;
-        clr   = 1'b1; // clear is active high
+        Clock50MHz = 1'b0;
+        clr        = 1'b1; // clear is active high
 
         #50 clr = 0; 
     end
@@ -78,31 +90,17 @@ module firFilter_Testbench;
     // clock period
     //
     always
-        #5 clk <= ~clk; //toggle clk 
+        #10 Clock50MHz <= ~Clock50MHz; //toggle clk 
         
     //
     // test run
     //
-    integer i;
-    
-    initial
-    #202  // wait for initialization to end and start between clock edges
-    
-    begin
-        for (i=0; i<70; i=i+1)
-        begin                             
-            inputData = SineTable [TableIndex]; #50;
-            load = 1; #50;   // allow enough clocks for "ready" to go high between loads
-            load = 0; #180;
-
-            TableIndex = TableIndex + 1;
-            
-            if (TableIndex > 24)
-                TableIndex = TableIndex - 25;
-        end
+//    always begin
+//
+//    end
         
 
-        #400 
-            $finish;
-    end
+    //    #400 
+    //        $finish;
+
 endmodule

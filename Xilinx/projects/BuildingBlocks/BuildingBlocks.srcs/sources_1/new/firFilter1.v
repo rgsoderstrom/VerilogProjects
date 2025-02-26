@@ -20,18 +20,26 @@
 
 /*
     slow implementation, 1 clock per tap
-        3.521W, 42.1 degree C junc temp
 */
 
+
+/*
+	Not maintained, use firFilter2
+*/
+
+
+/************
+
 `timescale 1ns / 1ps
+`default_nettype none
 
 module firFilter1 #(parameter DataWidth = 10)
-                   (input  Clock,
-                    input  Load,
-                    output Ready,
-                    input  Clear,
-                    input  signed [DataWidth-1:0] InputData,  
-                    output reg signed [DataWidth-1:0] FilteredData);
+                   (input  wire Clock,
+                    input  wire Load,
+                    output wire Ready,
+                    input  wire Clear,
+                    input  wire signed [DataWidth-1:0] InputData,  
+                    output reg  signed [DataWidth-1:0] FilteredData);
                     
     reg signed [DataWidth-1:0] Buf0, Buf1,  Buf2,  Buf3,  Buf4,  Buf5,  Buf6,  Buf7, Buf8; 
     reg signed [DataWidth-1:0] Buf9, Buf10, Buf11, Buf12, Buf13, Buf14, Buf15, Buf16; 
@@ -179,3 +187,5 @@ module firFilter1 #(parameter DataWidth = 10)
         end
     end                        
 endmodule
+
+************/

@@ -18,24 +18,17 @@
           actual attenuation = -44.19998518331085 dB
 */    
 
-/*
-    faster implementation 
-    
-            - CAUTION: IMPLEMENTATION REPORTS SHOW THIS RUNS TOO HOT
-
-*/
-
-
-
 `timescale 1ns / 1ps
+`default_nettype none
 
-module firFilter2 #(parameter DataWidth = 10)
-                   (input  Clock,
-                    input  Load,
-                    output Ready,
-                    input  Clear,
-                    input  signed [DataWidth-1:0] InputData,  
-                    output reg signed [DataWidth-1:0] FilteredData);
+module firFilter2 #(parameter DataWidth = 16, // will only work with these values. See line 161
+                    parameter FractBits = 10)
+                   (input  wire Clock,
+                    input  wire Load,
+                    output wire Ready,
+                    input  wire Clear,
+                    input  wire signed [DataWidth-1:0] InputData,  
+                    output reg  signed [DataWidth-1:0] FilteredData);
                     
     reg signed [DataWidth-1:0] Buf0, Buf1,  Buf2,  Buf3,  Buf4,  Buf5,  Buf6,  Buf7, Buf8; 
     reg signed [DataWidth-1:0] Buf9, Buf10, Buf11, Buf12, Buf13, Buf14, Buf15, Buf16; 
@@ -43,7 +36,7 @@ module firFilter2 #(parameter DataWidth = 10)
     wire signed [DataWidth-1:0] h0, h1,  h2,  h3,  h4,  h5,  h6,  h7, h8; 
     wire signed [DataWidth-1:0] h9, h10, h11, h12, h13, h14, h15, h16; 
              
-    localparam FixedPoint_One = (1 << DataWidth);
+    localparam FixedPoint_One = (1 << FractBits);
     
     assign h0  =  0.016344994571662934 * FixedPoint_One;
     assign h1  =  0.03153993235313417  * FixedPoint_One;
@@ -164,7 +157,8 @@ module firFilter2 #(parameter DataWidth = 10)
 					   end
 
                 5'd7 : begin 
-				           FilteredData <= FinalSum [2 * DataWidth - 1 : DataWidth]; 
+				     //    FilteredData <= FinalSum [2 * DataWidth - 1 : DataWidth]; 
+				           FilteredData <= FinalSum [25 : 10]; 
 						   state <= 0; 
 					   end                
 				
