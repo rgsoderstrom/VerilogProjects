@@ -5,9 +5,9 @@
 `timescale 1ns / 1ps
 
 module PowerOnReset #(parameter Count = 150_000_000)
-                     (input Clock50MHz,
-                      input ClearBar,  // external pin pulled up to +5V
-                      output Clear);
+                     (input  wire Clock50MHz,
+                      input  wire ClearBar,  // external pin pulled up to +5V
+                      output wire Clear);
 
 	reg [31:0] ResetCounter;
 

@@ -6,10 +6,10 @@
 `timescale 1ns / 1ps
 
 module Mux2 #(parameter Width = 8)
- 			 (input  [Width-1:0] in0,  
-              input  [Width-1:0] in1,
-			  input              select,
-	          output [Width-1:0] out);
+ 			 (input wire  [Width-1:0] in0,  
+              input wire  [Width-1:0] in1,
+			  input wire              select,
+	          output wire [Width-1:0] out);
 	        //output reg [Width-1:0] out);
 			
 //    always @ (*)

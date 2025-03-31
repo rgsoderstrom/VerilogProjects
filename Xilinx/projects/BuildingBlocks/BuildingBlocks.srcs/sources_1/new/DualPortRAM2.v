@@ -7,22 +7,22 @@
 `timescale 1ns / 1ps
 
 module DualPortRAM2 #(parameter AddrWidth = 10) 
-                     (input      Clk,
+                     (input wire      Clk,
 					  
  					  // byte access
-                      input      [7:0] ByteWriteData,
+                      input wire      [7:0] ByteWriteData,
                       output reg [7:0] ByteReadData,   // ByteReadData valid 3 clocks after ByteRead asserted
-                      input            ByteWrite,
-                      input            ByteRead, 
-                      input            ByteClearAddr,
+                      input  wire           ByteWrite,
+                      input  wire           ByteRead, 
+                      input  wire           ByteClearAddr,
                          
 					  // word access
-                      input      [15:0] WordWriteData,
-                      output     [15:0] WordReadData,  // WordReadData valid 2 clocks after WordReadAsserted
-                      input      [AddrWidth-1:0] WordWriteAddr,
-                      input      [AddrWidth-1:0] WordReadAddr,
-                      input                      WordWrite,
-                      input                      WordRead);
+                      input  wire    [15:0] WordWriteData,
+                      output wire    [15:0] WordReadData,  // WordReadData valid 2 clocks after WordReadAsserted
+                      input  wire    [AddrWidth-1:0] WordWriteAddr,
+                      input  wire    [AddrWidth-1:0] WordReadAddr,
+                      input  wire                    WordWrite,
+                      input  wire                    WordRead);
 		
     localparam DataWidth = 16;
 	localparam WordCount = 1 << AddrWidth;

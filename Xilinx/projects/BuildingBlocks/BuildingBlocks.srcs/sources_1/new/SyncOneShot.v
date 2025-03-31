@@ -4,10 +4,10 @@
 // SyncOneShot - synchronous one-shot
 //
 
-module SyncOneShot (input trigger, // low->high triggers, not required to be sync to clk
-                    input clk,
-                    input clr,  // async, active high
-                    output Q);  // pos pulse, one clock period long
+module SyncOneShot (input  wire trigger, // low->high triggers, not required to be sync to clk
+                    input  wire clk,
+                    input  wire clr,  // async, active high
+                    output wire Q);  // pos pulse, one clock period long
 
 	wire A, B, Bbar;
  

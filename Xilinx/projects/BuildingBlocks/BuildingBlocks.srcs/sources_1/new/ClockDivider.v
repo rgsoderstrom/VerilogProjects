@@ -3,12 +3,13 @@
 */
 
 `timescale 1ns / 1ps
+`default_nettype none
 
 module ClockDivider #(parameter Divisor = 4)
- 					 (input  FastClock,  
-                      input  Clear,      // active high
-                      output SlowClock,  // (FastClock / Divisor), 50% duty cycle
-					  output Pulse);     // single pulse at SlowClock rate
+ 					 (input  wire FastClock,  
+                      input  wire Clear,      // active high
+                      output wire SlowClock,  // (FastClock / Divisor), 50% duty cycle
+					  output wire Pulse);     // single pulse at SlowClock rate
                      
     reg [31:0] Count;
     reg [31:0] Div = Divisor;

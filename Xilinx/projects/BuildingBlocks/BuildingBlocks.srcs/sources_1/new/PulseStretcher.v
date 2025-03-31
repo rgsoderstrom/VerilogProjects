@@ -5,9 +5,9 @@
 `timescale 1ns / 1ps
 
 module PulseStretcher #(parameter Count = 500_000)
-                       (input Clock50MHz,
-                        input trigger,
-                        output extended);
+                       (input  wire Clock50MHz,
+                        input  wire trigger,
+                        output wire extended);
 
     reg [23:0] Counter = 0;
     assign extended = (Counter != 24'h0);    

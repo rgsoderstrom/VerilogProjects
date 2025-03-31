@@ -5,14 +5,14 @@
 //
 
 module SerializerStoP #(parameter Width = 4) 
-                       (input DataIn,
-                        input Shift,
-                        input Done,   // data source sets this true when entire word has been shifted in
+                       (input wire DataIn,
+                        input wire Shift,
+                        input wire Done,   // data source sets this true when entire word has been shifted in
                         
-                        input Clr,  // sync, active high
-                        input Clk,  // pos edge trigger
+                        input wire Clr,  // sync, active high
+                        input wire Clk,  // pos edge trigger
                         
-                        output Ready, // copy of "Done" input
+                        output wire Ready, // copy of "Done" input
                         output reg  [Width-1:0] DataOut);
          
     assign Ready = Done;

@@ -6,16 +6,16 @@
 `timescale 1ns / 1ps
 
 module HeaderMsgSender #(parameter MsgID = 100)
-				       (input  Clock,        
- 				        input  Clear,
+				       (input  wire Clock,        
+ 				        input  wire Clear,
 					   
-                        input        Send, // from controller
-                        input        P2S_Empty,
-                        input [15:0] SeqNumber,
+                        input wire        Send, // from controller
+                        input wire        P2S_Empty,
+                        input wire [15:0] SeqNumber,
 						
-                        output       Ready,    // ready to send, to controller
-                        output       LoadByte, // to P2S serializer
-					    output [7:0] MsgByte);
+                        output  wire      Ready,    // ready to send, to controller
+                        output  wire      LoadByte, // to P2S serializer
+					    output  wire[7:0] MsgByte);
 
 	// wires from header generator to msg sender
 	wire [7:0]  HeaderByte;

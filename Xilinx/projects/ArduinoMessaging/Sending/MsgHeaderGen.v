@@ -7,13 +7,13 @@
 
 module MsgHeaderGen #(parameter ID = 16'h1, 
                       parameter ByteCount = 16'h8) 
-			         (input Clk,
-                      input ClearAddr,
-                      input NextAddr,
-                      input      [15:0] SequenceNumber, // typically counts up for each msg sent
-                      output reg [15:0] MsgByteCount,   // for entire message, header & data
-                      output            LastReadByte,   // AddrCounter == LastAddress
-                      output [7:0]      HeaderByte);    // Memory [AddrCounter]
+			         (input wire Clk,
+                      input wire ClearAddr,
+                      input wire NextAddr,
+                      input wire  [15:0] SequenceNumber, // typically counts up for each msg sent
+                      output reg  [15:0] MsgByteCount,   // for entire message, header & data
+                      output wire        LastReadByte,   // AddrCounter == LastAddress
+                      output wire [7:0]  HeaderByte);    // Memory [AddrCounter]
 					  
     reg [7:0] Memory [0:7];
 	reg [2:0] AddrCounter = 0;

@@ -5,23 +5,23 @@
 
 `timescale 1ns / 1ps
 
-module MsgSender  (input Clock,
-                   input Clear,
+module MsgSender  (input wire Clock,
+                   input wire Clear,
                    
                    output reg   Ready, // ready to send
-                   input        Send,
-                   output [7:0] OutputByte, // next byte to shift out 
+                   input  wire  Send,
+                   output wire [7:0] OutputByte, // next byte to shift out 
 
-                   input [7:0]  HeaderByte,     // MsgHeaderGen interface                                
-                   input        LastHeaderByte, 
-                   input [15:0] ByteCount,
+                   input wire [7:0]  HeaderByte,     // MsgHeaderGen interface                                
+                   input wire   LastHeaderByte, 
+                   input wire [15:0] ByteCount,
                    output reg   ClearHeaderAddr,
                    output reg   NextHeaderAddr,
                    
                    output reg   P2SLoad,       // Parallel to serial shift register
-                   input        P2SEmpty,
+                   input  wire  P2SEmpty,
                    
-                   input [7:0]  DataByte,      // Msg data RAM interface                               
+                   input wire [7:0]  DataByte,      // Msg data RAM interface                               
                    output reg   ClearDataAddr, 
                    output reg   RamRead);
                

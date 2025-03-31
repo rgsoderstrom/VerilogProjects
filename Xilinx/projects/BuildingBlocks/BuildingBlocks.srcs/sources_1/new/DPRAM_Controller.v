@@ -5,11 +5,11 @@
 
 `timescale 1ns / 1ps
 
-module DPRAM_Controller (input      Clk,
-						 input      ByteWrite,
-                         input      ByteRead,
-                         input      WordWrite,                         
-                         input      WordRead,
+module DPRAM_Controller (input  wire    Clk,
+						 input  wire    ByteWrite,
+                         input  wire    ByteRead,
+                         input  wire    WordWrite,                         
+                         input  wire    WordRead,
 						 output reg IncrByteAddr,
 						 output reg WordMuxSel,
 						 output reg [1:0] AddrMuxSel,

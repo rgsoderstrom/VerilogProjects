@@ -7,9 +7,9 @@
 
 module CounterUEC #(parameter Width = 8,
                     parameter Max = (1 << Width) - 1)
-                   (input                  Enable,
-				    input                  Clr,   // sync, active high
-                    input                  Clk,   // pos edge triggered
+                   (input  wire            Enable,
+				    input  wire            Clr,   // sync, active high
+                    input  wire            Clk,   // pos edge triggered
 					output reg             AtZero,
 					output reg             AtMax,
                     output reg [Width-1:0] Q);

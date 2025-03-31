@@ -7,24 +7,24 @@
 
 `timescale 1ns / 1ps
 
-module MsgHeaderDemux (input Clock,
-                       input Clear,
+module MsgHeaderDemux (input wire Clock,
+                       input wire Clear,
                    
                        // serial-to-parallel interface
-	  			       input [7:0]  MessageByte, // received from serial->parallel
-				       input        MessageByteReady,
+	  			       input wire [7:0]  MessageByte, // received from serial->parallel
+				       input wire        MessageByteReady,
 				   
 				       // controller inerface
-					   output  [15:0] SyncWord,
-					   output  [15:0] MessageID,
-					   output  [15:0] ByteCount,
-					   output  [15:0] SequenceNumber,
-					   output reg     MessageComplete,
+					   output wire  [15:0] SyncWord,
+					   output wire  [15:0] MessageID,
+					   output wire  [15:0] ByteCount,
+					   output wire  [15:0] SequenceNumber,
+					   output reg          MessageComplete,
 					   
 					   // data RAM interface
-					   output  [7:0] DataByte, // write to data RAM				   
-  					   output reg ClearDataByteAddr, // 
-	  				   output reg WriteDataByte);
+					   output wire  [7:0] DataByte, // write to data RAM				   
+  					   output reg         ClearDataByteAddr, // 
+	  				   output reg         WriteDataByte);
 
 localparam WaitForSyncByte1  = 0; // wait for first sync byte
 localparam VerifySyncByte2   = 1; // ensure it is followed by correct 2nd byte

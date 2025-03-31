@@ -8,22 +8,22 @@
 
 module MsgRouter2 #(parameter ID1 = 16'd101,
                     parameter ID2 = 16'd102)
-                   (input Clock,
-                    input Clear,
+                   (input wire Clock,
+                    input wire Clear,
                    
                     // serial-to-parallel interface
-			 	    input [7:0]  MessageByte, // received from serial->parallel
-				    input        MessageByteReady,
+			 	    input wire [7:0]  MessageByte, // received from serial->parallel
+				    input wire        MessageByteReady,
 				   
 				    // controller interface
-                    output  [15:0] SyncWord,
-                    output  [15:0] MessageID,
-                    output  [15:0] ByteCount,
-                    output  [15:0] SequenceNumber,
-			        output         MessageComplete,
+                    output wire  [15:0] SyncWord,
+                    output wire  [15:0] MessageID,
+                    output wire  [15:0] ByteCount,
+                    output wire  [15:0] SequenceNumber,
+			        output wire         MessageComplete,
 				   
 				    // data RAM interface
-				    output  [7:0] DataByte, // write to data RAM				   
+				    output wire  [7:0] DataByte, // write to data RAM				   
 					
 				    output reg ClearMsg1,
 				    output reg WriteMsg1, 

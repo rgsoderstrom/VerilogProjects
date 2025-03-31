@@ -5,16 +5,16 @@
 //
 
 module SerializerPtoS #(parameter Width = 8)
-                       (input [Width-1:0] Input,
-                        input             Clr,   // sync, active high
-                        input             Clk,   // pos edge triggered
-                        input             Load,
-                        input             Shift,
+                       (input wire [Width-1:0] Input,
+                        input wire             Clr,   // sync, active high
+                        input wire             Clk,   // pos edge triggered
+                        input wire             Load,
+                        input wire             Shift,
 						
-						output            Empty,     // ready to load,
-						output            FirstBit,  // true when OutputBit is first bit of Input
-						output            LastBit,   //  "     "      "     "  last   "   "   "						
-                        output            OutputBit);
+						output wire            Empty,     // ready to load,
+						output wire            FirstBit,  // true when OutputBit is first bit of Input
+						output wire            LastBit,   //  "     "      "     "  last   "   "   "						
+                        output wire            OutputBit);
 
     localparam MSB = Width - 1;
 	
