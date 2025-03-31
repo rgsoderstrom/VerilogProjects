@@ -4,7 +4,7 @@
 
 `timescale 1ns / 1ps
 
-module SineFromTable (input clk_in1,
+module SineFromTable (input  Clock50MHz,
                       output test_point1,
                       output test_point2,
                       output dac_csn,  // -- DAC SPI Chip Select
@@ -26,22 +26,12 @@ module SineFromTable (input clk_in1,
     assign test_point1 = (phase == 0); // dac_busy;
     assign test_point2 = dac_trigger;
 
-  //  assign Clock10MHz = Clock50MHz;
-        
-//    ClockDivider #(.Divisor (4))
-// 			   U1 (.FastClock (Clock50MHz),  
-//                   .Clear (0), // active high
-//                   .SlowClock (Clock12MHz),  
-//				   .Pulse ()); // (phaseCountEnable));     // periodic pulse, FastClock width and SlowClock rate
+    ClockDivider #(.Divisor (4))
+ 			   U1 (.FastClock (Clock50MHz),  
+                   .Clear (0), // active high
+                   .SlowClock (Clock12MHz),  
+				   .Pulse ()); // (phaseCountEnable));     // periodic pulse, FastClock width and SlowClock rate
 
-  clk_wiz_0 U1
-   (
-        .clk_out1 (Clock12MHz),     // output clk_out1
-        .reset(0), // input reset
-        .locked(),       // output locked
-        .clk_in1(clk_in1)      // input clk_in1
-    );
-    
     PhaseCounter #(.Width (16))
                U2 (.Clock (Clock12MHz),
                    .Clear (0),
@@ -64,8 +54,7 @@ module SineFromTable (input clk_in1,
                   .dac_trigger (dac_trigger));
     
     Mercury2_DAC
-           //U5 (.dac_clk  (Clock10MHz),
-             U5 (.clk_50MHZ  (clk_in1),
+             U5 (.clk_50MHZ (Clock50MHz),
                  .trigger  (dac_trigger),
                  .channel  (0),
                  .Din      (sine [15:6]),

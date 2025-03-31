@@ -27,8 +27,10 @@ module SineTable (input [15:0] phase, // fraction of a cycle. Bit 15 = 0.5, Bit 
         
     reg  [15:0] SineTable [0:15]; // == sin (index)
     reg  [15:0] StepTable [0:15]; // == sin (index+1) - sin (index), amount to add to get to next entry
-    wire [15:0] SineTableOut;
-    wire [15:0] StepTableOut;
+//    wire [15:0] SineTableOut;
+//    wire [15:0] StepTableOut;
+    reg  [15:0] SineTableOut;
+    reg  [15:0] StepTableOut;
 
     wire        loadTheta;
     wire        enableMult;
@@ -60,12 +62,13 @@ module SineTable (input [15:0] phase, // fraction of a cycle. Bit 15 = 0.5, Bit 
         StepTable [12] = 16'h0feb;  StepTable [13] = 16'h0bd4;  StepTable [14] = 16'h0748;  StepTable [15] = 16'h0275;  
     end
      
-    assign SineTableOut = SineTable [index];
-    assign StepTableOut = StepTable [index];
+    //assign SineTableOut = SineTable [index];
+    //assign StepTableOut = StepTable [index];
     
-//    always @ (posedge Clock)
-//    begin
-
-//    end    
+    always @ (posedge Clock)
+    begin
+        SineTableOut <= SineTable [index];
+        StepTableOut <= StepTable [index];
+    end    
 
 endmodule

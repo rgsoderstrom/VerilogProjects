@@ -4,7 +4,7 @@
 <!-- Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.                   -->
 <!-- Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.   -->
 
-<Project Product="Vivado" Version="7" Minor="65" Path="C:/Users/rgsod/Documents/FPGA/Xilinx/projects/CORDIC1/CORDIC1.xpr">
+<Project Product="Vivado" Version="7" Minor="65" Path="C:/Users/rgsod/Documents/FPGA/Xilinx/projects/CORDIC/CORDIC1/CORDIC1.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="64703cc2990b4fb9b0cf0b17426b58f7"/>
@@ -60,7 +60,7 @@
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
     <Option Name="FeatureSet" Val="FeatureSet_Classic"/>
-    <Option Name="WTXSimLaunchSim" Val="58"/>
+    <Option Name="WTXSimLaunchSim" Val="61"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -105,15 +105,6 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/imports/new/ClockDivider.v">
-        <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../BuildingBlocks/BuildingBlocks.srcs/sources_1/new/ClockDivider.v"/>
-          <Attr Name="ImportTime" Val="1660274079"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
       <File Path="$PSRCDIR/sources_1/new/WindowGenerator.v">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -123,7 +114,7 @@
       </File>
       <File Path="$PSRCDIR/sources_1/imports/M2_CORDIC_DAC/p2r_cordic.vhd">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/p2r_cordic.vhd"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/p2r_cordic.vhd"/>
           <Attr Name="ImportTime" Val="1554413081"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -131,7 +122,7 @@
       </File>
       <File Path="$PSRCDIR/sources_1/imports/M2_CORDIC_DAC/Mercury2_CORDIC.vhd">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/Mercury2_CORDIC.vhd"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/Mercury2_CORDIC.vhd"/>
           <Attr Name="ImportTime" Val="1556219217"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -139,7 +130,7 @@
       </File>
       <File Path="$PSRCDIR/sources_1/imports/M2_CORDIC_DAC/Mercury2_DAC.vhd">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/Mercury2_DAC.vhd"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/Mercury2_DAC.vhd"/>
           <Attr Name="ImportTime" Val="1557331876"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -147,7 +138,7 @@
       </File>
       <File Path="$PSRCDIR/sources_1/imports/M2_CORDIC_DAC/p2r_CordicPipe.vhd">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/p2r_CordicPipe.vhd"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../zArchive/SineWave/SineWave.srcs/sources_1/imports/M2_CORDIC_DAC/p2r_CordicPipe.vhd"/>
           <Attr Name="ImportTime" Val="1550766012"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -169,8 +160,15 @@
       </File>
       <File Path="$PSRCDIR/sources_1/imports/new/UnsignedMult.v">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../SineFromTable/SineFromTable.srcs/sources_1/imports/new/UnsignedMult.v"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../SineFromTable/SineFromTable.srcs/sources_1/imports/new/UnsignedMult.v"/>
           <Attr Name="ImportTime" Val="1679189862"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../BuildingBlocks/BuildingBlocks.srcs/sources_1/new/ClockDivider.v">
+        <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -204,7 +202,7 @@
       </File>
       <File Path="$PSRCDIR/sim_1/imports/new/Mercury2_DAC_Sim.v">
         <FileInfo>
-          <Attr Name="ImportPath" Val="$PPRDIR/../zArchive/SwitchesToDAC/SwitchesToDAC.srcs/sim_1/new/Mercury2_DAC_Sim.v"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../../zArchive/SwitchesToDAC/SwitchesToDAC.srcs/sim_1/new/Mercury2_DAC_Sim.v"/>
           <Attr Name="ImportTime" Val="1677681690"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>

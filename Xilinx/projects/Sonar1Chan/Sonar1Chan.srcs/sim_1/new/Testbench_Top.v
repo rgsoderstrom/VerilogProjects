@@ -3,6 +3,10 @@
     Testbench_Top - for top-level Sonar1Chan test
 */
 
+/*
+	SonarDAC and SonarADC1 must be modified to use DAC sim and ADC sim 
+*/
+
 `timescale 1ns / 1ps
 
 module Testbench_Top;
@@ -26,9 +30,9 @@ module Testbench_Top;
 	wire firstBit;
 	
 
-    Sonar1Chan #(.RamAddrBits (4), 
+    Sonar1Chan #(.RamAddrBits (5), 
                  .MaxSamplesPerMsg (7), //(16), // doesn't have to be a power of 2
-                 .ResetCount (50))
+                 .PowerOnResetCount (50))
 				U1 (.Clock50MHz (Clock),        
 			  	    .ClearBar (ClearBar),
 					   
@@ -63,14 +67,14 @@ module Testbench_Top;
     //    
 	
 	reg  [7:0] M1 [0:7]; // ClearSampleBufferMsg
-    reg  [7:0] M2 [0:7]; // BeginSamplingMsg    
+    reg  [7:0] M2 [0:7]; // PingMsg    
     reg  [7:0] M3 [0:7]; // SendSamplesMsg    	
 	
     initial
     begin
-        M1 [0] = 8'h34; M1 [1] = 8'h12; M1 [2] = 8'h08; M1 [3] = 8'h00; M1 [4] = 8'd100; M1 [5] = 8'd00; M1 [6] = 8'h01; M1 [7] = 8'h00; 
-        M2 [0] = 8'h34; M2 [1] = 8'h12; M2 [2] = 8'h08; M2 [3] = 8'h00; M2 [4] = 8'd101; M2 [5] = 8'd00; M2 [6] = 8'h02; M2 [7] = 8'h00; 
-        M3 [0] = 8'h34; M3 [1] = 8'h12; M3 [2] = 8'h08; M3 [3] = 8'h00; M3 [4] = 8'd102; M3 [5] = 8'd00; M3 [6] = 8'h03; M3 [7] = 8'h00; 
+        M1 [0] = 8'h34; M1 [1] = 8'h12; M1 [2] = 8'h08; M1 [3] = 8'h00; M1 [4] = 8'd150; M1 [5] = 8'd00; M1 [6] = 8'h01; M1 [7] = 8'h00; 
+        M2 [0] = 8'h34; M2 [1] = 8'h12; M2 [2] = 8'h08; M2 [3] = 8'h00; M2 [4] = 8'h5f;  M2 [5] = 8'h01; M2 [6] = 8'h02; M2 [7] = 8'h00; 
+        M3 [0] = 8'h34; M3 [1] = 8'h12; M3 [2] = 8'h08; M3 [3] = 8'h00; M3 [4] = 8'd151; M3 [5] = 8'h00; M3 [6] = 8'h03; M3 [7] = 8'h00; 
     end		
 
     initial
@@ -93,12 +97,17 @@ module Testbench_Top;
 		
     initial
     begin
-		#50_000 
+
+		$display ($time, "    Testbench begins");	
+		#20_000  // wait for power-on reset to finish
+
 		
 		//********************************************************************
 		//
 		// Clear - send ClearSampleBufferMsg 
 		//
+		$display ($time, "    Send Clear command");	
+		
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
 			for (i=0; i<8; i=i+1) // 8 bits per byte
@@ -112,33 +121,10 @@ module Testbench_Top;
 			  #20 inputByteReady <= 0;
         end
         
+		$display ($time, "    Clear command sent");
+		
         // end Clear
         //*********************************************************************
-
-        //*****************************************************************************
-        //
-        // Send - SendSamples message
-        //
-        for (p=0; p<3; p=p+1) // send the "send" message this many times
-        begin        
-            #120_000        
-            for (j=0; j<8; j=j+1) // 8 bytes
-            begin
-                for (i=0; i<8; i=i+1) // 8 bits per byte
-                  begin
-                    #10 inputDataBit <= M3 [j][7-i];  // SendSamplesMsg                    
-                    #10 inputShiftClock <= 1'b1;
-                    #50 inputShiftClock <= 1'b0;
-                  end
-            
-                  #10 inputByteReady <= 1;
-                  #20 inputByteReady <= 0;
-            end
-        end
-        // end Send        
-        //****************************************************************************
-        
-
 
         
         //*********************************************************************
@@ -160,10 +146,13 @@ module Testbench_Top;
         end
 
         // end Ping
+
+		$display ($time, "    Ping command sent");
+		
+
         //*********************************************************************
 
-        #10_000_000  // $finish;
-
+        #50_000_000  // 50msec
 
         //*****************************************************************************
         //
@@ -172,6 +161,8 @@ module Testbench_Top;
         for (p=0; p<3; p=p+1) // send the "send" message this many times
         begin        
             #120_000        
+			$display ($time, "    Sending Sample Request message");
+
             for (j=0; j<8; j=j+1) // 8 bytes
             begin
                 for (i=0; i<8; i=i+1) // 8 bits per byte
@@ -186,6 +177,8 @@ module Testbench_Top;
             end
         end
         
+		$display ($time, "    Done Sending Sample Requests");
+		
         // end Send        
         //****************************************************************************
         

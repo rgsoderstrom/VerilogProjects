@@ -36,7 +36,7 @@ module CORDIC1_Testbench;
     // clock period
     //
     always
-        #5 clk = ~clk; //toggle clk 
+        #10 clk = ~clk; //toggle clk 
         
     //
     // test run
