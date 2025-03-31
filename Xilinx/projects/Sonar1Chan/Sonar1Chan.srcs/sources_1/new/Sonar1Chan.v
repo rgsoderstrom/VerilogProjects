@@ -7,33 +7,33 @@
 
 module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits) samples collected
                     parameter MaxSamplesPerMsg = 256,
-					parameter ResetCount = 50_000_000)
-				   (input Clock50MHz,
-			  	    input ClearBar,
+					parameter PowerOnResetCount = 50_000_000)
+				   (input wire Clock50MHz,
+			  	    input wire ClearBar,
 					   
-                    input InputBit,
-                    input InputBitShiftClock,
-                    input InputByteDone,
+                    input wire InputBit,
+                    input wire InputBitShiftClock,
+                    input wire InputByteDone,
 					   
-                    output OutputBit,
-                    input  OutputBitShiftClock,
-                    output LastBit,
-                    output FirstBit,
+                    output wire OutputBit,
+                    input  wire OutputBitShiftClock,
+                    output wire LastBit,
+                    output wire FirstBit,
                          
-                    output TP39,
-                    output TP38,
+                    output wire TP39,
+                    output wire TP38,
                     //output TP37,
                     //output TP36,
                        
-					input  adc_miso, // ADC controls
-                    output adc_mosi,
-                    output adc_csn,
-                    output adc_sck,               
+					input  wire adc_miso, // ADC controls
+                    output wire adc_mosi,
+                    output wire adc_csn,
+                    output wire adc_sck,               
                        
-					output dac_csn,  // DAC controls
-                    output dac_sdi,  
-                    output dac_ldac, 
-                    output dac_sck);
+					output wire dac_csn,  // DAC controls
+                    output wire dac_sdi,  
+                    output wire dac_ldac, 
+                    output wire dac_sck);
 					
 	// msgs received from PC via Arduino
 	localparam ClearSampleBufferID = 'd150;
@@ -51,7 +51,7 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
 	
 	wire Clear;
 
-    PowerOnReset #(.Count (ResetCount))
+    PowerOnReset #(.Count (PowerOnResetCount))
                U100 (.Clock50MHz (Clock50MHz), .ClearBar (ClearBar), .Clear (Clear));
 			   
     // generate 10Hz ping trigger for initial tests

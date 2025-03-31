@@ -7,21 +7,21 @@
 `timescale 1ns / 1ps
 
 module DAC0_DataGenerator #(parameter Width = 10)  
-                           (input  Clock50MHz,
-                            input  StartPing,
-                            input  dac_busy,
-                            input [15:0] Duration,   // in clocks, duration at max level
-                            input [15:0] Frequency,  // (FreqInHz / 190), see CORDIC.vhd
-                            output dac_trigger,
-                            output PingDone,
-                            output [Width-1:0] PingWords);
+                           (input wire Clock50MHz,
+                            input wire StartPing,
+                            input wire dac_busy,
+                            input wire [15:0] Duration,   // in clocks, duration at max level
+                            input wire [15:0] Frequency,  // (FreqInHz / 190), see CORDIC.vhd
+                            output wire dac_trigger,
+                            output wire PingDone,
+                            output wire [Width-1:0] PingWords);
                             
     wire [11:0] cordicOut;
     wire [11:0] windowOut;
     wire [11:0] multiplierOut;
     wire [11:0] subtracterOut;
     wire [11:0] shiftAddOut;
-    wire  [9:0] dac_input;
+  //wire  [9:0] dac_input;
     
     wire windowStart;
     wire windowDone;

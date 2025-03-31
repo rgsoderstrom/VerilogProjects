@@ -11,22 +11,22 @@
 module SampleMsgSenderV3 #(parameter SampleMsgID       = 200,
 				 		   parameter MaxSamplesPerMsg  = 32,  // max samples per message
                            parameter AddrWidth         = 10)  // up to 2^AddrWidth samples to send
-				         (input  Clock50MHz,
- 				          input  Clear,
+				         (input wire  Clock50MHz,
+ 				          input wire  Clear,
 
- 				          input  PrepareToSend, // assert once prior to a message set
-						  output Ready,         // ready to send a message
-						  input  Send, 		    // send one message
+ 				          input  wire PrepareToSend, // assert once prior to a message set
+						  output wire Ready,         // ready to send a message
+						  input  wire Send, 		    // send one message
 
-						  input [15:0] SeqNumber,
+						  input wire [15:0] SeqNumber,
 
-						  input  [7:0]         SampleByte,  // A/D Sample RAM interface
-						  output               SampleByteRead,
-						  input  [AddrWidth:0] SampleCount, // total number to send
+						  input  wire [7:0]         SampleByte,  // A/D Sample RAM interface
+						  output  wire              SampleByteRead,
+						  input   wire[AddrWidth:0] SampleCount, // total number to send
 
-					  	  input        P2S_Empty, // output serializer can accept a byte
-						  output       LoadByte,  // into output serializer
-						  output [7:0] MsgByteOut);
+					  	  input   wire      P2S_Empty, // output serializer can accept a byte
+						  output  wire      LoadByte,  // into output serializer
+						  output  wire [7:0] MsgByteOut);
 						  
 	// wires to/from the controller
 	reg 	   SubtSentCount;

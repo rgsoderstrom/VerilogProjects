@@ -3,18 +3,19 @@
 */    
 
 `timescale 1ns / 1ps
+`default_nettype none
 
-module CORDIC1_Top (input  Clock50MHz, 
-                    output test_point1,
-                    output test_point2,
-                    output dac_csn,  // -- DAC SPI Chip Select
-                    output dac_sdi,  // -- DAC SPI MOSI
-                    output dac_ldac, // -- DAC SPI Latch enable
-                    output dac_sck); // -- DAC SPI CLOCK
+module CORDIC1_Top (input  wire Clock50MHz, 
+                    output wire test_point1,
+                    output wire test_point2,
+                    output wire dac_csn,  // -- DAC SPI Chip Select
+                    output wire dac_sdi,  // -- DAC SPI MOSI
+                    output wire dac_ldac, // -- DAC SPI Latch enable
+                    output wire dac_sck); // -- DAC SPI CLOCK
 
     localparam PRF = 20; // pulses per second
     
-    reg  [15:0] freq = 16'd215; // = freq / 190
+    reg  [15:0] freq = 16'd212; // = freq / 190
     wire [11:0] cordicOut;
     wire [11:0] windowOut;
     wire [11:0] multiplierOut;

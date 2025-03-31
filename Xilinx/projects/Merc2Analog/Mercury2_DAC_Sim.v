@@ -1,15 +1,15 @@
 
 `timescale 1ns / 1ps
 
-module Mercury2_DAC_Sim (input clk_50MHZ, // -- 50MHz onboard oscillator
-                         input trigger,   // -- assert to write Din to DAC
-                         input channel,   // -- 0 = DAC0/A, 1 = DAC1/B
-                         input [9:0] Din, // -- data for DAC
+module Mercury2_DAC_Sim (input wire clk_50MHZ, // -- 50MHz onboard oscillator
+                         input wire trigger,   // -- assert to write Din to DAC
+                         input wire channel,   // -- 0 = DAC0/A, 1 = DAC1/B
+                         input wire [9:0] Din, // -- data for DAC
                          output reg Busy, // -- busy signal during conversion process
-                         output dac_csn,
-                         output dac_sdi, 
-                         output dac_ldac, 
-                         output dac_sck);
+                         output wire dac_csn,
+                         output wire dac_sdi, 
+                         output wire dac_ldac, 
+                         output wire dac_sck);
 
 reg [1:0] State = 0;
 reg [6:0] counter = 0;

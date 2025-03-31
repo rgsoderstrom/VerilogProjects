@@ -5,12 +5,12 @@
 
 `timescale 1ns / 1ps
 
-module DAC1_Controller (input  Clock,
-                        input  BeginBlanking,
-                        input  BeginRamp,
-                        input  dac_busy,
-                        input  CountEnable,
-                        input  RampDone,
+module DAC1_Controller (input wire Clock,
+                        input wire BeginBlanking,
+                        input wire BeginRamp,
+                        input wire dac_busy,
+                        input wire CountEnable,
+                        input wire RampDone,
 						output reg InBlanking,
                         output reg dac_trigger,
                         output reg LoadBlanking,

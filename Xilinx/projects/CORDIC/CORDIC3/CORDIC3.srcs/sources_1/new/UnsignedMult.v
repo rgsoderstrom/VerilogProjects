@@ -7,14 +7,15 @@
 module UnsignedMult #(parameter WidthA = 8,
                                 WidthB = 8,
                                 WidthOut = 16)
-                     (output [WidthOut-1:0] out, 
-                      input  [WidthA-1:0]  a, 
-                      input  [WidthB-1:0]  b,
-					  input  Enable,
-                      input  Clock);
+                     (output wire [WidthOut-1:0] out, 
+                      input wire  [WidthA-1:0]  a, 
+                      input wire  [WidthB-1:0]  b,
+					  input wire  Enable,
+                      input wire  Clock);
     
     reg [WidthA + WidthB-1 : 0] fullProduct;
-    assign out = fullProduct [WidthA+WidthB-1 : WidthA+WidthB-WidthOut];
+    assign out = fullProduct [WidthA+WidthB-1 -: WidthOut];
+//  assign out = fullProduct [WidthA+WidthB-1 : WidthA+WidthB-WidthOut];
     
     always @ (posedge Clock)
     begin

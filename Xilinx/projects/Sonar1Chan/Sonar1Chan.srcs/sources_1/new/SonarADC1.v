@@ -5,25 +5,25 @@
 `timescale 1ns / 1ps
 
 module SonarADC1# (parameter RamAddrBits = 12)
-                  (input Clock50MHz,
-			  	   input Clear,
+                  (input wire Clock50MHz,
+			  	   input wire Clear,
 				   
-				   output [7:0] ByteReadData,
-				   input        SampleByteRead,
-				   input        ByteAddrClear,
+				   output wire [7:0] ByteReadData,
+				   input  wire       SampleByteRead,
+				   input  wire       ByteAddrClear,
 				   
-				   input ClearSampleBuffer,
-				   input BeginSampling,
-				   output     Busy, // was reg
-				   output     [RamAddrBits:0] SampleCount,
+				   input  wire ClearSampleBuffer,
+				   input  wire BeginSampling,
+				   output wire Busy, // was reg
+				   output wire [RamAddrBits:0] SampleCount,
 				// output reg [RamAddrBits:0] SampleCount,
 				   
-				   input [15:0] SampleClockDivisor,
+				   input wire [15:0] SampleClockDivisor,
                        
-				   input  adc_miso, // ADC controls
-                   output adc_mosi,
-                   output adc_csn,
-                   output adc_sck);
+				   input  wire adc_miso, // ADC controls
+                   output wire adc_mosi,
+                   output wire adc_csn,
+                   output wire adc_sck);
 				   
 				   
     wire [15:0] 		   SampleWriteData;
@@ -41,8 +41,8 @@ module SonarADC1# (parameter RamAddrBits = 12)
                 
     wire [9:0] Sample;
                              
-  //Mercury2_ADC_Sim 
-    Mercury2_ADC 
+    Mercury2_ADC_Sim 
+  //Mercury2_ADC 
 				U1 (.clock   (Clock50MHz),
                     .trigger (ADC_Trigger),
                     .channel (3'b000),

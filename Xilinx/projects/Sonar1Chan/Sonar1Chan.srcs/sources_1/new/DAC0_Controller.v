@@ -5,10 +5,10 @@
 
 `timescale 1ns / 1ps
 
-module DAC0_Controller (input  Clock50MHz,
-                        input  dac_busy,
-                        input  StartPing,
-                        input  WindowDone,
+module DAC0_Controller (input wire Clock50MHz,
+                        input wire dac_busy,
+                        input wire StartPing,
+                        input wire WindowDone,
                         output reg WindowStart,
                         output reg dac_trigger,
                         output reg MultSubEnable,

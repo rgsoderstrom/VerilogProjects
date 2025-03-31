@@ -9,20 +9,20 @@ module MsgSenders_S1C #(parameter AddrWidth        = 10,
 						parameter MaxSamplesPerMsg = 256,
                         parameter RdyMsgID    = 201,
 						parameter SampleMsgID = 200)
-                      (input Clock,
-                       input Clear,
+                      (input wire Clock,
+                       input wire Clear,
                        
-                       input SendReadyMsg,
-                       input SendSampleMsg,
-                       input SampleMsgPrep,
+                       input wire SendReadyMsg,
+                       input wire SendSampleMsg,
+                       input wire SampleMsgPrep,
                        
-                       input [7:0]         SampleByte,
-                       output              SampleByteRead,
-                       input [AddrWidth:0] SampleCount,                       
+                       input wire [7:0]          SampleByte,
+                       output wire               SampleByteRead,
+                       input  wire [AddrWidth:0] SampleCount,                       
                    
-                       output [7:0] OutputByte,
-                       output       LoadOutputByte,
-                       input        P2S_Empty);
+                       output wire [7:0] OutputByte,
+                       output wire       LoadOutputByte,
+                       input  wire       P2S_Empty);
 
 	//*******************************************************
 	

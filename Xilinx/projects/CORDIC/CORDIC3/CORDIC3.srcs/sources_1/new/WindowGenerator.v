@@ -6,12 +6,12 @@
 `timescale 1ns / 1ps
 
 module WindowGenerator #(parameter Width = 12)      // bits. Default of 12 matches CORDIC                                                                      
-                        (input  Clock50MHz,
-                         input  Clear,
-                         input  Trigger,
-                         input  [15:0] Duration,    // time at max level, clocks
+                        (input wire  Clock50MHz,
+                         input wire  Clear,
+                         input wire  Trigger,
+                         input wire  [15:0] Duration,    // time at max level, clocks
                          output reg WindowDone,
-                         output [Width-1:0] Window);
+                         output wire [Width-1:0] Window);
                          
     localparam MaxRampCount = 12'h3ff; // (1 << Width) - 1;
     localparam RampStep = 1;

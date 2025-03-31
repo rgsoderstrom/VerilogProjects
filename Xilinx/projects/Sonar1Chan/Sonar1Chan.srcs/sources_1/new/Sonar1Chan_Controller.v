@@ -8,12 +8,13 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
                                parameter BeginSamplingID     = 'd101,
 							   parameter SendSamplesID       = 'd102,
 							   parameter ParametersID        = 'd103)
-							 (input Clock50MHz,
-						      input Clear,
+							 (input wire Clock50MHz,
+						      input wire Clear,
+							  input wire ForcePing,   // for test & debug
 							  
 							// message router
-							  input InputMsgComplete,
-							  input [15:0] InputMsgID,
+							  input wire InputMsgComplete,
+							  input wire [15:0] InputMsgID,
 							  
 							// message senders
 							  output reg SendRdyMsg,
@@ -21,13 +22,12 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 							  output reg SampleMsgPrep,
 
 							// SonarADC1 module
-							  input      ADC_Busy,
+							  input wire ADC_Busy,
 							  output reg ClearSampleBuffer,
 							  output reg BeginSampling,
 							  
 						    // SonarDAC
-							  input      ForcePing,   // for test & debug
-						      input      RampBeginning,
+						      input wire RampBeginning,
 							  output reg BeginPingSequence);
 
 	localparam PowerOn      = 'd0;

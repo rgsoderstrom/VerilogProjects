@@ -4,17 +4,17 @@
 
 `timescale 1ns / 1ps
 
-module SonarADC1_Controller (input Clock50MHz,        
-				             input Clear,
+module SonarADC1_Controller (input wire Clock50MHz,        
+				             input wire Clear,
 
-    						 input [15:0] SampleClockDivisor,
+    						 input wire [15:0] SampleClockDivisor,
        
-                             input      ADC_Valid,
-                             output reg ADC_Trigger,
+                             input  wire ADC_Valid,
+                             output reg  ADC_Trigger,
                         
-							 input      SampleWriteAddrWrapped,
-							 input      ClearSampleBuffer,
-							 input      BeginSampling,
+							 input wire      SampleWriteAddrWrapped,
+							 input wire      ClearSampleBuffer,
+							 input wire      BeginSampling,
 							 
 							 output reg Busy,
 							 

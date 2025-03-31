@@ -5,12 +5,12 @@
 `timescale 1ns / 1ps
 
 module Sonar1Chan_Params #(parameter WW = 16) // WordWidth = 16 bits
-                         (input Clock50MHz,
+                         (input wire Clock50MHz,
 						  
-						  input [7:0] MsgByte,       // from MsgRouter
-						  input       NewMessage,    //   "
-						  input       WriteByte,     //   "
-						  input       MsgComplete,   //   "
+						  input wire [7:0] MsgByte,       // from MsgRouter
+						  input wire       NewMessage,    //   "
+						  input wire       WriteByte,     //   "
+						  input wire       MsgComplete,   //   "
 						  
 						  // ADC sample rate
 						  output reg [WW-1:0] SampleClockDivisor,
@@ -28,7 +28,7 @@ module Sonar1Chan_Params #(parameter WW = 16) // WordWidth = 16 bits
     
 	// default values
 	localparam _SampleClockDivisor   = 50_000_000 / 100_000;
-	localparam _PingFrequency        = 40_200 / 190;        // (FreqInHz / 190), see CORDIC.vhd
+	localparam _PingFrequency        = 10_050 / 190; //                                      *****   40_200 / 190;        // (FreqInHz / 190), see CORDIC.vhd
 	localparam _PingDuration         = 0.001 * 50_000_000;  // in clocks, duration at max level                 
 	localparam _CountsPerVolt        = 1024 / 2.048;
 	localparam _BlankingLevel        = 0.025 * _CountsPerVolt; // = BlankingVoltage * CountsPerVolt;

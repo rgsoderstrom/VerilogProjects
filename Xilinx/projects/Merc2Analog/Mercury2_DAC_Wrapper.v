@@ -7,15 +7,15 @@
 
 module Mercury2_DAC_Wrapper #(ClockFreq = 50_000_000, // Hz
                               SettlingTime = 2e-6)  // seconds
-                     (input  clk_50MHZ,                      
-					  input  trigger,
-					  input  channel,
-                      input  [9:0] Din,					 
-                      output Busy,
-					  output dac_csn,
-					  output dac_sdi,
-					  output dac_ldac,
-					  output dac_sck); 
+                     (input wire  clk_50MHZ,                      
+					  input wire  trigger,
+					  input wire  channel,
+                      input wire  [9:0] Din,					 
+                      output wire Busy,
+					  output wire dac_csn,
+					  output wire dac_sdi,
+					  output wire dac_ldac,
+					  output wire dac_sck); 
                                           
     localparam DelayClocks = ClockFreq * SettlingTime;
 	wire DacBusy;

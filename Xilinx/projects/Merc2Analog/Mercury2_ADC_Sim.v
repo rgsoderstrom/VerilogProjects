@@ -1,16 +1,16 @@
 
 `timescale 1ns / 1ps
 
-module Mercury2_ADC_Sim (input  clock,         // -- 50MHz onboard oscillator
-                         input  trigger,       // -- assert to write Din to ADC
-                         input  [2:0] channel, // -- 0..7
+module Mercury2_ADC_Sim (input wire  clock,         // -- 50MHz onboard oscillator
+                         input wire  trigger,       // -- assert to write Din to ADC
+                         input wire [2:0] channel, // -- 0..7
                          output reg [9:0] Dout,    // -- data out
                          output reg OutVal,    // -- output valid
-                         input  diffn,         // -- select single ended or differential
-                         input  adc_miso,
-                         output adc_mosi, 
-                         output adc_cs, 
-                         output adc_clk);
+                         input wire diffn,         // -- select single ended or differential
+                         input wire adc_miso,
+                         output wire adc_mosi, 
+                         output wire adc_cs, 
+                         output wire adc_clk);
                          
 reg [1:0] State = 0;
 reg [6:0] counter = 0;

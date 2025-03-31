@@ -5,12 +5,12 @@
 
 `timescale 1ns / 1ps
 
-module SonarDAC_Controller (input  Clock50MHz,
-					 	    input  BeginSequence,
-						    input  PingDone,
+module SonarDAC_Controller (input wire  Clock50MHz,
+					 	    input wire  BeginSequence,
+						    input wire  PingDone,
 						  //input  RampDone,
-						    input  InBlanking,
-						    input [19:0] BlankingCounts,
+						    input wire  InBlanking,
+						    input wire [19:0] BlankingCounts,
 						    output reg BeginPing,
                             output reg BeginBlanking,
                             output reg BeginRamp,

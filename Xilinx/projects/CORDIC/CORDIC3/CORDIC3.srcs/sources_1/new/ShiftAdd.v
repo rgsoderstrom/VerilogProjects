@@ -6,10 +6,10 @@
 
 module ShiftAddr #(parameter Width = 8)
                   (output reg [Width-1:0] out, 
-                   input      [Width-1:0] a, 
-                   input      [Width-1:0] b,
-	  		       input Enable,
-                   input Clock);
+                   input wire      [Width-1:0] a, 
+                   input wire      [Width-1:0] b,
+	  		       input wire Enable,
+                   input wire Clock);
     
     wire [Width-1:0] bb;
     assign bb = b >> 1;
