@@ -4,40 +4,38 @@
 
 `timescale 1ns / 1ps
 
-module CORDIC1_controller (input  Clk50,
-                           input  dac_busy,
-                           output reg WindowStep,
-                           output reg MultSubEnable,
-                           output reg ShiftAddEnable,
-                           output reg dac_trigger);                                                     
-reg [6:0] State;
-reg [7:0] DelayCounter;
+module CORDIC1_controller (input wire Clk50,
+                           input wire dac_busy,
+                           output reg dac_trigger);  
 
-initial
-    State = 7'h0;
-    
-always @ (posedge Clk50)
-	begin
-        case (State)
-		    7'h00: if (dac_busy == 0) State <= 7'h7;
-
-		    7'h07: begin DelayCounter <= 8'd112; State <= 7'h08; end  
-            7'h08: begin DelayCounter <= DelayCounter - 1; State <= 7'h09; end
-            7'h09: if (DelayCounter == 0) State <= 7'h10; else State <= 7'h08;
-            		    
-            7'h10: State <= 7'h20;            
-            7'h20: State <= 7'h30;
-            7'h30: State <= 7'h40;
-            7'h40: State <= 7'h00;
-        	default: State <= 7'h00;
-		endcase
-	end
+	localparam WaitForReady = 4'h0;
+	localparam LoadDAC      = 4'h1;
+	localparam LoadDelay    = 4'h2;
+	localparam DecrDelay    = 4'h3;
+	localparam TestDelay    = 4'h4;
 	
-always @ (*)
-	begin
-		dac_trigger    <= (State == 7'h10);
-		WindowStep     <= (State == 7'h20);
-		MultSubEnable  <= (State == 7'h30);
-		ShiftAddEnable <= (State == 7'h40);
-	end
+	reg [3:0] State;
+	reg [9:0] DelayCounter;
+	
+	localparam DelayCount = 50_000_000 / 200_000; // (Clocks per second) / (Samples per second) = clocks per sample
+
+	initial
+		State = WaitForReady;
+		
+	always @ (posedge Clk50)
+		begin
+			case (State)
+				WaitForReady: if (dac_busy == 0) State <= LoadDAC;
+				LoadDAC:      State <= LoadDelay;
+				LoadDelay:    begin DelayCounter <= DelayCount; State<= DecrDelay; end
+				DecrDelay:    begin DelayCounter <= DelayCounter - 1; State <= TestDelay; end
+				TestDelay:    if (DelayCounter == 0) State <= WaitForReady; else State <= DecrDelay;
+				default: State <= 7'h00;
+			endcase
+		end
+	
+	always @ (*)
+		begin
+			dac_trigger <= (State == LoadDAC);
+		end
 endmodule

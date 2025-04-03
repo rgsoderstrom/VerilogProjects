@@ -17,7 +17,7 @@ reg [6:0] counter = 0;
 reg [9:0] value0 = 0;
 reg [9:0] value1 = 0;
 
-localparam Delay = 16; // DAC reports Busy for this many clocks after trigger
+localparam Delay = 70; // DAC reports Busy for this many clocks after trigger - 1.4 uS
 
 assign dac_csn  = 0;
 assign dac_sdi  = 0;

@@ -4,20 +4,20 @@
 
 `timescale 1ns / 1ps
 
-module WindowGenerator #(parameter Width = 12,      // bits
-                                   Duration = 1024) // time at max level, clocks
-                        (input  Clock,
-                         input  Clear,
-                         input  Trigger,
-                         input  Step,
-                         output [Width-1:0] Window);
+module WindowGenerator #(parameter Width        = 16,    // bits
+                                   FractionBits = 10,
+                                   Duration     = 1024) // time at max level, clocks
+                        (input  wire Clock,
+                         input  wire Clear,
+                         input  wire Trigger,
+                         input  wire Step,
+                         output wire signed [Width-1:0] Window);
                          
-    localparam MAX = (1 << Width) - 2048; // 1024 bad
-  //localparam MAX = (1 << (Width - 1)) - 1;
-  //localparam MAX = (1 << Width) - 1;
+    localparam One = (1 << FractionBits);
+
                              
-    reg [Width-1:0] RampCounter; // counts clocks during transitions
-    reg [15:0] DurationCounter;  // counts clocks while at max
+    reg signed [15:0] RampCounter;     // counts clocks during transitions
+    reg [15:0] DurationCounter; // counts clocks while at max
     reg [1:0] State;
             
     assign Window = RampCounter;
@@ -49,7 +49,7 @@ module WindowGenerator #(parameter Width = 12,      // bits
             case (State)
                 0: State <= 0;
                 
-                1: if (RampCounter == MAX)
+                1: if (RampCounter == One)
                      begin 
                        DurationCounter <= 0;
                        State <= 2;

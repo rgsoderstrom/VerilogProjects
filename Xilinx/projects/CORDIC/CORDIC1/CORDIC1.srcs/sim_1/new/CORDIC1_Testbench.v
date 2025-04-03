@@ -10,7 +10,8 @@
 
 module CORDIC1_Testbench;
 
-    reg  clk;
+    reg  clk = 0;
+	reg  clr = 1;
                     
     CORDIC1_Top U1 (.Clock50MHz (clk), 
                     .test_point1 (),
@@ -26,10 +27,12 @@ module CORDIC1_Testbench;
     initial
     begin
         $display ("module: %m");
-        $display ("U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input");
-        $monitor($time, ": DATA: %d, %d, %d, %d, %d", U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input); 
+       // $display ("U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input");
+       // $monitor($time, ": DATA: %d, %d, %d, %d, %d", U1.cordicOut, U1.windowOut, U1.multiplierOut, U1.subtracterOut, U1.dac_input); 
 
         clk = 1'b0;
+		
+		#100 clr = 0;
     end
     
     //
@@ -43,8 +46,8 @@ module CORDIC1_Testbench;
     //
     initial
     begin
-  //      #5000 
-  //          $finish;
+       // #50000 
+           // $finish;
          
           
     end
