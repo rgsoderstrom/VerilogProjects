@@ -5,7 +5,8 @@
 `timescale 1ns / 1ps
 `default_nettype none
 
-module ClockDivider #(parameter Divisor = 4)
+module ClockDivider #(parameter Divisor = 4,
+                                InitialValue = 1) // default to 1 so we don't immediately get a pulse out
  					 (input  wire FastClock,  
                       input  wire Clear,      // active high
                       output wire SlowClock,  // (FastClock / Divisor), 50% duty cycle
@@ -15,7 +16,7 @@ module ClockDivider #(parameter Divisor = 4)
     reg [31:0] Div = Divisor;
        
     initial
-        Count = 0;
+        Count = InitialValue;
                 
     assign SlowClock = (Count < Div / 2);
 	assign Pulse     = (Count == 0);
@@ -23,7 +24,7 @@ module ClockDivider #(parameter Divisor = 4)
     always @ (posedge FastClock) 
         begin
             if (Clear == 1'b1)
-                Count <= 0;
+                Count <= InitialValue;
             
             else if (Count == Div - 1)
                 Count <= 0;
