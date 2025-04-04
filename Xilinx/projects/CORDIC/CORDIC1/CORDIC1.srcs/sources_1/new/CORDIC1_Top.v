@@ -76,5 +76,6 @@ module CORDIC1_Top (input  wire Clock50MHz,
                       .Clear   (0),
                       .Trigger (windowStart),
                       .Step    (windowStep),
+					  .Done    (),
                       .Window  (windowSamples));
 endmodule

@@ -11,6 +11,7 @@ module WindowGenerator #(parameter Width        = 16,    // bits
                          input  wire Clear,
                          input  wire Trigger,
                          input  wire Step,
+                         output reg  Done,
                          output wire signed [Width-1:0] Window);
                          
     localparam One = (1 << FractionBits);
@@ -18,7 +19,7 @@ module WindowGenerator #(parameter Width        = 16,    // bits
                              
     reg signed [15:0] RampCounter;     // counts clocks during transitions
     reg [15:0] DurationCounter; // counts clocks while at max
-    reg [1:0] State;
+    reg [3:0] State;
             
     assign Window = RampCounter;
                                  
@@ -63,12 +64,19 @@ module WindowGenerator #(parameter Width        = 16,    // bits
                    end
                    
                 3: if (RampCounter == 0) 
-                       State <= 0;
+                       State <= 4;
                    else 
                        RampCounter <= RampCounter - 1;
+					   
+				4: State <= 0;
                  
                 default: State <= 0;
             endcase
     end
+	
+	always @ (*)
+	begin
+		Done = (State == 4);
+	end
 
 endmodule
