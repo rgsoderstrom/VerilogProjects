@@ -73,8 +73,8 @@ module SonarDAC #(parameter DacWidth = 10)
                            .dac_busy    (dacBusy),
                            .dac_trigger (trigger1));
     
-    Mercury2_DAC_Wrapper_Sim
-  //Mercury2_DAC_Wrapper
+  //Mercury2_DAC_Wrapper_Sim
+	Mercury2_DAC_Wrapper
                  U4 (.clk_50MHZ (Clock50MHz), 
                      .trigger   (dacTrigger),   
                      .channel   (dacMuxSelect),   

@@ -9,44 +9,51 @@ module DAC0_Controller (input wire Clock50MHz,
                         input wire dac_busy,
                         input wire StartPing,
                         input wire WindowDone,
-                        output reg WindowStart,
+                        output reg WindowStart,  
+						output reg EnableCordic,
                         output reg dac_trigger,
-                        output reg MultSubEnable,
-                        output reg ShiftAddEnable,
+                        output reg MultEnable,
                         output reg Done);
               
-reg [7:0] State;
+localparam Idle       = 0;
+localparam SetWS      = 1;
+localparam WaitForDAC = 2;
+localparam WriteDAC   = 3;
+localparam DoMult     = 4;
+localparam SetDone    = 5;
+			  
+reg [2:0] State;
 
 initial
-    State = 7'h0;
-    
+  begin
+    State <= Idle;
+    EnableCordic <= 0;
+  end
+  
 always @ (posedge Clock50MHz)
 	begin
         case (State)
-		    8'h00: if (StartPing == 1) State <= 8'h10;
+		    Idle: if (StartPing == 1) State <= SetWS;
             
-            8'h10: State <= 8'h20;    
+            SetWS: begin EnableCordic <= 1; State <= WaitForDAC; end    
+			
+            WaitForDAC: begin if (dac_busy == 0) State <= WriteDAC; end
+			
+            WriteDAC: State <= DoMult;
+			
+            DoMult:  if (WindowDone == 1) State <= SetDone; else State <= WaitForDAC;
             
-            8'h20: begin if (dac_busy == 0) State <= 8'h30; end
-            
-            8'h30: State <= 8'h40;
-            
-            8'h40: State <= 8'h50;
-            
-            8'h50: begin if (WindowDone == 1) State <= 8'h60; else State <= 8'h20; end	    
-            
-            8'h60: State <= 8'h00;		    
-            
-        	default: State <= 7'h00;
+            SetDone: begin EnableCordic <= 0; State <= Idle; end
+                        
+        	default: State <= Idle;
 		endcase
 	end
 	
 always @ (*)
 	begin
-	    WindowStart    <= (State == 8'h10);
-		dac_trigger    <= (State == 8'h30);
-		MultSubEnable  <= (State == 8'h40);
-		ShiftAddEnable <= (State == 8'h50);
-		Done           <= (State == 8'h60);
+	    WindowStart <= (State == SetWS);
+		dac_trigger <= (State == WriteDAC);
+		MultEnable  <= (State == DoMult);
+		Done        <= (State == SetDone);
 	end                       
 endmodule

@@ -41,8 +41,8 @@ module SonarADC1# (parameter RamAddrBits = 12)
                 
     wire [9:0] Sample;
                              
-    Mercury2_ADC_Sim 
-  //Mercury2_ADC 
+  //Mercury2_ADC_Sim 
+    Mercury2_ADC 
 				U1 (.clock   (Clock50MHz),
                     .trigger (ADC_Trigger),
                     .channel (3'b000),
