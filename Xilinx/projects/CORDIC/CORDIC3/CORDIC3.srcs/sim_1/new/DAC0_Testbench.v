@@ -18,7 +18,7 @@ module DAC0_Testbench;
     wire [9:0] PingData;
     wire Done;
     
-    reg [15:0] WindowDuration = 10000;
+    reg [15:0] WindowDuration = 1000; // 10000;
     reg [15:0] Frequency = 40800 / 190;
     
     DAC0_DataGenerator
@@ -26,7 +26,7 @@ module DAC0_Testbench;
                            .StartPing      (PingTrigger),
                            .dac_busy       (dacBusy),     
                            .Frequency      (Frequency),                      
-                           .WindowDuration (WindowDuration),
+                           .Duration       (WindowDuration),
                            .dac_trigger    (dacTrigger),
                            .PingDone       (Done),
                            .PingWords      (PingData));
@@ -74,7 +74,7 @@ module DAC0_Testbench;
             PingTrigger = 0;
             
         #500_000
-            WindowDuration = 5000;
+            WindowDuration = 2000;
             PingTrigger = 1;
         
         #20

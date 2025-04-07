@@ -7,24 +7,24 @@
 `timescale 1ns / 1ps
 
 module DAC1_DataGenerator #(parameter DacWidth = 10)
-                           (input Clock50MHz,
+                           (input wire Clock50MHz,
 
                             // DAC output level to turn off AD605
-							input [DacWidth-1:0] BlankingLevel, // = BlankingVoltage * CountsPerVolt;
+							input wire [DacWidth-1:0] BlankingLevel, // = BlankingVoltage * CountsPerVolt;
 
                             // DAC output level at beginning and end of TVG ramp														
-							input [DacWidth-1:0] RampStartingLevel,  // = InitialVoltage  * CountsPerVolt;                               
-							input [DacWidth-1:0] RampStoppingLevel,  // = FinalVoltage    * CountsPerVolt;
+							input wire [DacWidth-1:0] RampStartingLevel,  // = InitialVoltage  * CountsPerVolt;                               
+							input wire [DacWidth-1:0] RampStoppingLevel,  // = FinalVoltage    * CountsPerVolt;
 							           
 							// set ramp rate                    
-							input [31:0] RampRateClkDivisor, // = 50e6 / RampRate;
+							input wire [31:0] RampRateClkDivisor, // = 50e6 / RampRate;
                            
-                            input  BeginBlanking, // command to load BlankingLevel into DAC
-                            input  BeginRamp,     // command to start ramping up TVG
-                            output InBlanking,
-                            output [DacWidth-1:0] DAC,
-                            input                 dac_busy,
-                            output                dacTrigger);
+                            input  wire  BeginBlanking, // command to load BlankingLevel into DAC
+                            input  wire  BeginRamp,     // command to start ramping up TVG
+                            output wire InBlanking,
+                            output wire [DacWidth-1:0] DAC,
+                            input  wire                dac_busy,
+                            output wire                dac_trigger);
                            
                              
     wire CountEnable;
@@ -43,7 +43,7 @@ module DAC1_DataGenerator #(parameter DacWidth = 10)
                         .dac_busy      (dac_busy),
                         .CountEnable   (CountEnable),
 						.RampDone      (RampDone),
-                        .dac_trigger   (dacTrigger),
+                        .dac_trigger   (dac_trigger),
                         .InBlanking    (InBlanking),
                         .LoadBlanking  (LoadBlanking),
                         .LoadInitial   (LoadInitial));

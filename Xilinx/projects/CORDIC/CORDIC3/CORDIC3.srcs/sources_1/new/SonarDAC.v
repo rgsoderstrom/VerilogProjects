@@ -6,26 +6,27 @@
 `timescale 1ns / 1ps
 
 module SonarDAC #(parameter DacWidth = 10)
-                 (input Clock50MHz,
+                 (input wire Clock50MHz,
                     
-                  input BeginSequence,
+                  input wire  BeginSequence,
+				  output wire RampBeginning,
                      
                   // DAC0 ping parameters 
-                  input [15:0] Frequency,                       
-                  input [15:0] PingDuration,
+                  input wire [15:0] Frequency,                       
+                  input wire [15:0] PingDuration,
 
                   // DAC1 TVG parameters 
-				  input [DacWidth-1:0] BlankingLevel,        // = BlankingVoltage * CountsPerVolt;
-				  input [DacWidth-1:0] RampStartingLevel,    // = InitialVoltage  * CountsPerVolt;                               
-				  input [DacWidth-1:0] RampStoppingLevel,    // = FinalVoltage    * CountsPerVolt;                               
-				  input [31:0]         RampRateClockDivisor, // = 50e6 / RampRate;
+				  input wire [DacWidth-1:0] BlankingLevel,        // = BlankingVoltage * CountsPerVolt;
+				  input wire [DacWidth-1:0] RampStartingLevel,    // = InitialVoltage  * CountsPerVolt;                               
+				  input wire [DacWidth-1:0] RampStoppingLevel,    // = FinalVoltage    * CountsPerVolt;                               
+				  input wire [31:0]         RampRateClockDivisor, // = 50e6 / RampRate;
                     
                 //output test_point1,
                 //output test_point2,
-                  output dac_csn,
-                  output dac_sdi,
-                  output dac_ldac,
-                  output dac_sck);
+                  output wire dac_csn,
+                  output wire dac_sdi,
+                  output wire dac_ldac,
+                  output wire dac_sck);
 					 
 
     wire startPing;
@@ -41,6 +42,8 @@ module SonarDAC #(parameter DacWidth = 10)
     wire [DacWidth-1:0] Din;
     wire dacMuxSelect;
     
+	assign RampBeginning = beginRamp;
+	
   //assign test_point1 = BeginSequence;
   //assign test_point1 = pingDone;
     
@@ -64,14 +67,14 @@ module SonarDAC #(parameter DacWidth = 10)
 						   .RampStoppingLevel  (RampStoppingLevel),    // = FinalVoltage    * CountsPerVolt;                               
 						   .RampRateClkDivisor (RampRateClockDivisor), // = 50e6 / RampRate;                         
                            .BeginBlanking      (beginBlanking),
-						   .InBlanking (inBlanking),
-                           .BeginRamp  (beginRamp),                           
-                           .DAC        (DAC1),
-                           .dac_busy   (dacBusy),
-                           .dacTrigger (trigger1));
+						   .InBlanking  (inBlanking),
+                           .BeginRamp   (beginRamp),                           
+                           .DAC         (DAC1),
+                           .dac_busy    (dacBusy),
+                           .dac_trigger (trigger1));
     
-    Mercury2_DAC_Wrapper
   //Mercury2_DAC_Wrapper_Sim
+	Mercury2_DAC_Wrapper
                  U4 (.clk_50MHZ (Clock50MHz), 
                      .trigger   (dacTrigger),   
                      .channel   (dacMuxSelect),   

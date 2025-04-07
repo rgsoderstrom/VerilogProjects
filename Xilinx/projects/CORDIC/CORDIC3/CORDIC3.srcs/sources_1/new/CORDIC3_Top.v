@@ -35,12 +35,13 @@ module CORDIC3_Top (input  Clock50MHz,
 	reg [DacWidth-1:0] RampStoppingLevel    = RStop;
 	reg [31:0]         RampRateClockDivisor = 50e6 / RampRate;	
  
-	wire PingTrigger;    //      ----------- restore after TB
+	wire PingTrigger;    //      ----------- for non-TB
 	assign test_point1 = PingTrigger;
 	
 	SonarDAC 
 			U1 (.Clock50MHz  (Clock50MHz),                    
                 .BeginSequence (PingTrigger),
+				.RampBeginning (),
                    
                 // DAC0 ping parameters 
                 .Frequency    (Frequency),                       
@@ -52,13 +53,12 @@ module CORDIC3_Top (input  Clock50MHz,
 				.RampStoppingLevel    (RampStoppingLevel),    
 				.RampRateClockDivisor (RampRateClockDivisor),
                   
-              //output test_point1,
-              //output test_point2,
                 .dac_csn  (dac_csn),
                 .dac_sdi  (dac_sdi),
                 .dac_ldac (dac_ldac),
                 .dac_sck  (dac_sck));
-
+				
+				
 	ClockDivider #(.Divisor (50_000_000 / 20))
  				  (.FastClock (Clock50MHz),  
                    .Clear     (1'b0),  
