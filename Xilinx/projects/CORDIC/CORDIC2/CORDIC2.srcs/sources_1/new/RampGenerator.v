@@ -2,7 +2,9 @@
     RampGenerator
         - make the time-varying gain (TVG) ramp for sonar receiver
         - see Visio documentation
-*/    
+*/  
+
+// this was replaced by RampCounter.v for CORDIC3 and later  
 
 `timescale 1ns / 1ps
 

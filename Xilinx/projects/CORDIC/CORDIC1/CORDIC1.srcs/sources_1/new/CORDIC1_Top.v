@@ -21,7 +21,8 @@ module CORDIC1_Top (input  wire Clock50MHz,
     
     reg         [15:0] Frequency = 16'd212; // = freq / 190
     wire        [11:0] cordicOut;
- 	wire signed [15:0] signedCordicOut;
+// 	wire signed [15:0] signedCordicOut;
+ 	reg  signed [15:0] signedCordicOut;
 	
     wire signed [15:0] windowSamples;
     wire signed [15:0] windowedSine;
@@ -39,41 +40,68 @@ module CORDIC1_Top (input  wire Clock50MHz,
     assign test_point2 = dac_trigger; // dac_busy;   
     
     Mercury2_CORDIC
-        U1 (.clk_50MHz (Clock50MHz), .cor_en (1'b1), .phs_sft (Frequency), .outVal (cordicOut));
+        CORDIC (.clk_50MHz (Clock50MHz), .cor_en (1'b1), .phs_sft (Frequency), .outVal (cordicOut));
 		
-	assign signedCordicOut [10:0] = cordicOut [10:0];
-	wire sb = ~cordicOut [11]; // sign bit
-	assign signedCordicOut [15:11] = {sb, sb, sb, sb, sb};
+		
+		
+		
+	// assign signedCordicOut [10:0] = cordicOut [10:0];
+	// wire sb = ~cordicOut [11]; // sign bit
+	// assign signedCordicOut [15:11] = {sb, sb, sb, sb, sb};
 
-	wire signed [31:0] fullProduct = signedCordicOut * windowSamples;
+	wire sb = ~cordicOut [11]; // sign bit;
+	
+	always @ (posedge Clock50MHz) begin
+		signedCordicOut [10:0] <= cordicOut [10:0];
+		signedCordicOut [15:11] <= {sb, sb, sb, sb, sb};
+	end
+
+
+
+	// wire signed [31:0] fullProduct = signedCordicOut * windowSamples;
+	// assign windowedSine = fullProduct >> 10;
+
+	reg signed [31:0] r1;
+	reg signed [31:0] r2;
+
+	reg signed [31:0] fullProduct;// = signedCordicOut * windowSamples;
 	assign windowedSine = fullProduct >> 10;
+
+	always @ (posedge Clock50MHz) begin
+	//	fullProduct <= signedCordicOut * windowSamples;
+		r1 <= signedCordicOut * windowSamples;
+		r2 <= r1;
+		fullProduct <= r2;
+	end
+
+
 
   //Mercury2_DAC_Sim
 	Mercury2_DAC
-        U3 (.clk_50MHZ (Clock50MHz), .trigger  (dac_trigger), 
+       DAC (.clk_50MHZ (Clock50MHz), .trigger  (dac_trigger), 
             .channel (1'b0), 
             .Din (dac_input), .Busy (dac_busy), 
             .dac_csn (dac_csn), .dac_sdi (dac_sdi), .dac_ldac (dac_ldac), .dac_sck  (dac_sck));
             
     CORDIC1_controller 
-        U4 (.Clk50 (Clock50MHz), .dac_busy (dac_busy), .dac_trigger (dac_trigger)); 
+       Ctrl (.Clk50 (Clock50MHz), .dac_busy (dac_busy), .dac_trigger (dac_trigger)); 
            
     ClockDivider #(.Divisor (4)) 
- 			   U5 (.FastClock (Clock50MHz),  
-                   .Clear (1'b0),     // active high
-                   .SlowClock (),  // (FastClock / Divisor), 50% duty cycle
-				   .Pulse (windowStep));
+		WinStepClkDiv (.FastClock (Clock50MHz),  
+					   .Clear (1'b0),     // active high
+					   .SlowClock (),  // (FastClock / Divisor), 50% duty cycle
+					   .Pulse (windowStep));
            
     ClockDivider #(.InitialValue (50_000_000 / PRF - 1000),
 	               .Divisor (50_000_000 / PRF)) 
- 			   U6 (.FastClock (Clock50MHz),  
+ 	   PRF_ClkDiv (.FastClock (Clock50MHz),  
                    .Clear (1'b0),     // active high
                    .SlowClock (),  // (FastClock / Divisor), 50% duty cycle
 				   .Pulse (windowStart));
            
     WindowGenerator #(.Width (16), .Duration (5_000))
-                  U7 (.Clock   (Clock50MHz),
-                      .Clear   (0),
+           WindowGen (.Clock   (Clock50MHz),
+                      .Clear   (1'b0),
                       .Trigger (windowStart),
                       .Step    (windowStep),
 					  .Done    (),

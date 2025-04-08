@@ -2,6 +2,8 @@
     WindowGenerator
 */    
 
+// This is not the same as Sonar1Chan WindowGenerator
+
 `timescale 1ns / 1ps
 
 module WindowGenerator #(parameter Width        = 16,    // bits
@@ -15,7 +17,6 @@ module WindowGenerator #(parameter Width        = 16,    // bits
                          output wire signed [Width-1:0] Window);
                          
     localparam One = (1 << FractionBits);
-
                              
     reg signed [15:0] RampCounter;     // counts clocks during transitions
     reg [15:0] DurationCounter; // counts clocks while at max
