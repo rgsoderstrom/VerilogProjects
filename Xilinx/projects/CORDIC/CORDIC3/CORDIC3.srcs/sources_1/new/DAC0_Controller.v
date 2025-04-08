@@ -49,7 +49,8 @@ always @ (posedge Clock50MHz)
 		endcase
 	end
 	
-always @ (*)
+//always @ (*)
+always @ (posedge Clock50MHz)
 	begin
 	    WindowStart <= (State == SetWS);
 		dac_trigger <= (State == WriteDAC);

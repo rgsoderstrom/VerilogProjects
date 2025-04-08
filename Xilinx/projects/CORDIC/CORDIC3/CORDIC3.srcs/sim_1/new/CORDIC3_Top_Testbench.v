@@ -8,27 +8,18 @@
 module CORDIC3_Top_Testbench;
 
     reg  clk;
+	reg  clr = 1;
+	
     wire TP1;
-   // wire TP2;
-    reg  PingTrigger = 0;
-    wire SPingTrigger;
         
-    CORDIC3_Top #(.ClockFreq (50_000))
+    CORDIC3_Top //#(.ClockFreq (50_000))
               U1 (.Clock50MHz  (clk),
-                  .PingTrigger (SPingTrigger),
                   .test_point1 (TP1),
-                // .test_point2 (TP2),
                   .dac_csn (),
                   .dac_sdi (),
                   .dac_ldac (),
                   .dac_sck ());    
                   
-    SyncOneShot U2 (.trigger (PingTrigger), // low->high triggers, not required to be sync to clk
-                    .clk (clk),
-                    .clr (1'b0),           // async, active high
-                    .Q   (SPingTrigger));  // pos pulse, one clock period long
-                  
-    
     //
     // test bench initializations
     //    
@@ -53,13 +44,10 @@ module CORDIC3_Top_Testbench;
     //
     initial
     begin
-        #200 PingTrigger = 1;
-        #60  PingTrigger = 0;
+		#150 clr = 0;
+		
          
-        #25_000_000 PingTrigger = 1;
-        #60  PingTrigger = 0;
-         
-     //   #3000 $finish;                   
+   //    #300_000 $finish;                   
     end
 
 endmodule

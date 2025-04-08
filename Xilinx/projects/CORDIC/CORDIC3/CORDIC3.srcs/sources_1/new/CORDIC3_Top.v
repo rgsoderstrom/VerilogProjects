@@ -5,16 +5,14 @@
 
 `timescale 1ns / 1ps
 
-module CORDIC3_Top (input  Clock50MHz,
-
-                   // input PingTrigger, // for testbench only
-                      
-                    output test_point1,
-                  //output test_point2,
-                    output dac_csn,
-                    output dac_sdi,
-                    output dac_ldac,
-                    output dac_sck);
+module CORDIC3_Top #(parameter ClockFreq = 50_000_000,
+                               PRF = 25)
+                    (input  wire Clock50MHz,
+                     output wire test_point1,
+                     output wire dac_csn,
+                     output wire dac_sdi,
+                     output wire dac_ldac,
+                     output wire dac_sck);
 
 	localparam DacWidth = 10;
 	localparam CountsPerVolt = 1023 / 2.048; // DAC characteristic
@@ -35,11 +33,11 @@ module CORDIC3_Top (input  Clock50MHz,
 	reg [DacWidth-1:0] RampStoppingLevel    = RStop;
 	reg [31:0]         RampRateClockDivisor = 50e6 / RampRate;	
  
-	wire PingTrigger;    //      ----------- for non-TB
+	wire PingTrigger; 
 	assign test_point1 = PingTrigger;
 	
 	SonarDAC 
-			U1 (.Clock50MHz  (Clock50MHz),                    
+		 SDACs (.Clock50MHz  (Clock50MHz),                    
                 .BeginSequence (PingTrigger),
 				.RampBeginning (),
                    
@@ -59,8 +57,9 @@ module CORDIC3_Top (input  Clock50MHz,
                 .dac_sck  (dac_sck));
 				
 				
-	ClockDivider #(.Divisor (50_000_000 / 20))
- 				  (.FastClock (Clock50MHz),  
+	ClockDivider #(.Divisor (ClockFreq / PRF),
+	               .InitialValue (ClockFreq / PRF - 20))
+ 		  PRF_Gen (.FastClock (Clock50MHz),  
                    .Clear     (1'b0),  
                    .SlowClock (),  
 				   .Pulse     (PingTrigger));

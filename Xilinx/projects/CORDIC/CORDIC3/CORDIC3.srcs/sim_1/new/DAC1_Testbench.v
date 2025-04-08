@@ -49,7 +49,7 @@ module DAC1_Testbench;
                           .BeginRamp     (beginRamp),
                           .dac_busy      (dacBusy),
                           .DAC           (GainWord),
-                          .dacTrigger    (dacTrigger));
+                          .dac_trigger   (dacTrigger));
 
     Mercury2_DAC_Wrapper_Sim
                     DAC (.clk_50MHZ (clk),        // -- 50MHz onboard oscillator
@@ -92,8 +92,8 @@ module DAC1_Testbench;
         #20   beginRamp = 0;
 
 
-//        #20_000_000      
-//            ClockDivisor = ClockDivisor / 2;  
+        #20_000_000      
+              ClockDivisor = ClockDivisor / 2;  
 //            beginBlanking = 1;
         
         #100  beginBlanking = 1;        
