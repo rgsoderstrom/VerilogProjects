@@ -57,8 +57,9 @@ module CORDIC3_Top #(parameter ClockFreq = 50_000_000,
                 .dac_sck  (dac_sck));
 				
 				
-	ClockDivider #(.Divisor (ClockFreq / PRF),
-	               .InitialValue (ClockFreq / PRF - 20))
+	// ClockDivider #(.Divisor (ClockFreq / PRF),
+	               // .InitialValue (ClockFreq / PRF - 20))
+	ClockDivider #(.Divisor (ClockFreq / PRF))
  		  PRF_Gen (.FastClock (Clock50MHz),  
                    .Clear     (1'b0),  
                    .SlowClock (),  

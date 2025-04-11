@@ -16,7 +16,8 @@ module CounterUEC #(parameter Width = 8,
 
     reg [Width-1:0] Count;
 	
-    always @ (*) begin
+//    always @ (*) begin
+    always @ (posedge Clk) begin
         Q      = Count;
 		AtZero = (Count == 0);
 		AtMax  = (Count == Max);

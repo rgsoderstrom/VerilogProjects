@@ -50,32 +50,32 @@ module SonarDAC #(parameter DacWidth = 10)
     assign Din = (dacMuxSelect == 0 ? DAC0 : DAC1);
     assign dacTrigger = trigger0 | trigger1;
     
-    DAC0_DataGenerator U2 (.Clock50MHz  (Clock50MHz),
-                           .StartPing   (startPing),
+    DAC0_DataGenerator D0Gen (.Clock50MHz  (Clock50MHz),
+                              .StartPing   (startPing),
                            
-                           .Frequency (Frequency),                      
-                           .Duration  (PingDuration),
+                              .Frequency (Frequency),                      
+                              .Duration  (PingDuration),
                            
-                           .dac_trigger (trigger0),
-						   .dac_busy    (dacBusy),
-                           .PingDone    (pingDone),
-                           .PingWords   (DAC0));
+                              .dac_trigger (trigger0),
+						      .dac_busy    (dacBusy),
+                              .PingDone    (pingDone),
+                              .PingWords   (DAC0));
     
-    DAC1_DataGenerator U3 (.Clock50MHz         (Clock50MHz),
-						   .BlankingLevel      (BlankingLevel),        // = BlankingVoltage * CountsPerVolt;
-						   .RampStartingLevel  (RampStartingLevel),    // = InitialVoltage  * CountsPerVolt;                               
-						   .RampStoppingLevel  (RampStoppingLevel),    // = FinalVoltage    * CountsPerVolt;                               
-						   .RampRateClkDivisor (RampRateClockDivisor), // = 50e6 / RampRate;                         
-                           .BeginBlanking      (beginBlanking),
-						   .InBlanking  (inBlanking),
-                           .BeginRamp   (beginRamp),                           
-                           .DAC         (DAC1),
-                           .dac_busy    (dacBusy),
-                           .dac_trigger (trigger1));
+    DAC1_DataGenerator D1Gen (.Clock50MHz         (Clock50MHz),
+						      .BlankingLevel      (BlankingLevel),        // = BlankingVoltage * CountsPerVolt;
+							  .RampStartingLevel  (RampStartingLevel),    // = InitialVoltage  * CountsPerVolt;                               
+							  .RampStoppingLevel  (RampStoppingLevel),    // = FinalVoltage    * CountsPerVolt;                               
+							  .RampRateClkDivisor (RampRateClockDivisor), // = 50e6 / RampRate;                         
+							  .BeginBlanking      (beginBlanking),
+							  .InBlanking  (inBlanking),
+                              .BeginRamp   (beginRamp),                           
+                              .DAC         (DAC1),
+                              .dac_busy    (dacBusy),
+                              .dac_trigger (trigger1));
     
   //Mercury2_DAC_Wrapper_Sim
 	Mercury2_DAC_Wrapper
-                 U4 (.clk_50MHZ (Clock50MHz), 
+              M2DAC (.clk_50MHZ (Clock50MHz), 
                      .trigger   (dacTrigger),   
                      .channel   (dacMuxSelect),   
                      .Din       (Din), 
@@ -87,7 +87,7 @@ module SonarDAC #(parameter DacWidth = 10)
 					 
 	reg [19:0] BC = 50_000_000 * 0.003; // blanking counts
 	
-	SonarDAC_Controller U5 (.Clock50MHz   (Clock50MHz),
+	SonarDAC_Controller SC (.Clock50MHz   (Clock50MHz),
 	                       .BlankingCounts (BC),
 						   .BeginSequence (BeginSequence),
 						   .PingDone      (pingDone),

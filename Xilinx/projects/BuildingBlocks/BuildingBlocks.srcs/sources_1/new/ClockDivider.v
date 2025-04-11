@@ -5,13 +5,16 @@
 `timescale 1ns / 1ps
 `default_nettype none
 
-module ClockDivider #(parameter Divisor = 4,
-                                InitialValue = 1) // default to 1 so we don't immediately get a pulse out
+// module ClockDivider #(parameter Divisor = 4,
+                                // InitialValue = 1) // default to 1 so we don't immediately get a pulse out
+module ClockDivider #(parameter Divisor = 4)
  					 (input  wire FastClock,  
                       input  wire Clear,      // active high
                       output wire SlowClock,  // (FastClock / Divisor), 50% duty cycle
 					  output wire Pulse);     // single pulse at SlowClock rate
                      
+	localparam InitialValue = 1;
+	
     reg [31:0] Count;
     reg [31:0] Div = Divisor;
        

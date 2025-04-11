@@ -10,14 +10,14 @@
 `default_nettype none
 
 module CORDIC1_Top (input  wire Clock50MHz, 
-                    output wire test_point1,
-                    output wire test_point2,
+                    output wire test_point1, // IO [20]
+                    output wire test_point2, // IO [21]
                     output wire dac_csn,  // -- DAC SPI Chip Select
                     output wire dac_sdi,  // -- DAC SPI MOSI
                     output wire dac_ldac, // -- DAC SPI Latch enable
                     output wire dac_sck); // -- DAC SPI CLOCK
 
-    localparam PRF = 20; // pulses per second
+    localparam PRF = 50; // pulses per second
     
     reg         [15:0] Frequency = 16'd212; // = freq / 190
     wire        [11:0] cordicOut;
@@ -99,7 +99,7 @@ module CORDIC1_Top (input  wire Clock50MHz,
                    .SlowClock (),  // (FastClock / Divisor), 50% duty cycle
 				   .Pulse (windowStart));
            
-    WindowGenerator #(.Width (16), .Duration (5_000))
+    WindowGenerator #(.Width (16), .Duration (50_000))
            WindowGen (.Clock   (Clock50MHz),
                       .Clear   (1'b0),
                       .Trigger (windowStart),

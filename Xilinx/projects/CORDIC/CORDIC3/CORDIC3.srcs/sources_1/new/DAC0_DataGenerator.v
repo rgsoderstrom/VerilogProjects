@@ -62,13 +62,13 @@ module DAC0_DataGenerator #(parameter Width = 16,        // 16 bits per fixed po
 		
 		
     ClockDivider #(.Divisor (4)) 
- 			   U1 (.FastClock (Clock50MHz),  
+ 		  WinStep (.FastClock (Clock50MHz),  
                    .Clear (1'b0),     // active high
                    .SlowClock (),  // (FastClock / Divisor), 50% duty cycle
 				   .Pulse (windowStep));		   
 		   
     WindowGenerator 
-                  U2 (.Clock50MHz (Clock50MHz),
+              WinGen (.Clock50MHz (Clock50MHz),
                       .Clear      (1'b0),
                       .Trigger    (windowStart),
                       .Duration   (Duration),
@@ -77,16 +77,16 @@ module DAC0_DataGenerator #(parameter Width = 16,        // 16 bits per fixed po
                       .Window     (windowSamples));
 
     Mercury2_CORDIC
-        U3 (.clk_50MHz (Clock50MHz), .cor_en (EnableCordic), .phs_sft (Frequency), .outVal (cordicOut));
+     CORDIC (.clk_50MHz (Clock50MHz), .cor_en (EnableCordic), .phs_sft (Frequency), .outVal (cordicOut));
 
     DAC0_Controller 
-        U4 (.Clock50MHz   (Clock50MHz), 
-            .dac_busy     (dac_busy), 
-            .StartPing    (StartPing),
-            .WindowDone   (windowDone),
-            .Done         (PingDone),
-            .WindowStart  (windowStart), 
-            .dac_trigger  (dac_trigger), 
-            .EnableCordic (EnableCordic),
-            .MultEnable   (EnableMultiply)); 
+      D0Ctrl (.Clock50MHz   (Clock50MHz), 
+             .dac_busy     (dac_busy), 
+             .StartPing    (StartPing),
+             .WindowDone   (windowDone),
+             .Done         (PingDone),
+             .WindowStart  (windowStart), 
+             .dac_trigger  (dac_trigger), 
+             .EnableCordic (EnableCordic),
+             .MultEnable   (EnableMultiply)); 
 endmodule

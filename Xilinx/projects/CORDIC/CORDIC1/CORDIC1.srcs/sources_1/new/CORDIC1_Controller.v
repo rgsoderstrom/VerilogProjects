@@ -34,7 +34,8 @@ module CORDIC1_controller (input wire Clk50,
 			endcase
 		end
 	
-	always @ (*)
+	//always @ (*)
+	always @ (posedge Clk50)
 		begin
 			dac_trigger <= (State == LoadDAC);
 		end
