@@ -30,8 +30,8 @@ module Testbench_Top;
 	wire firstBit;
 	
 
-    Sonar1Chan #(.RamAddrBits (5), 
-                 .MaxSamplesPerMsg (7), //(16), // doesn't have to be a power of 2
+    Sonar1Chan #(.RamAddrBits (6), 
+                 .MaxSamplesPerMsg (16), // doesn't have to be a power of 2
                  .PowerOnResetCount (50))
 				U1 (.Clock50MHz (Clock),        
 			  	    .ClearBar (ClearBar),
@@ -132,6 +132,9 @@ module Testbench_Top;
         // Ping - send Ping message
         //
         #25_000
+		
+		$display ($time, "    Send Ping command");	
+		
         for (j=0; j<8; j=j+1) // 8 bytes
         begin
 			for (i=0; i<8; i=i+1) // 8 bits per byte

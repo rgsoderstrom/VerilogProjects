@@ -55,16 +55,14 @@ module Sonar1Chan #(parameter RamAddrBits = 12,        // up to (2 ^ RamAddrBits
                U100 (.Clock50MHz (Clock50MHz), .ClearBar (ClearBar), .Clear (Clear));
 			   
     // generate 10Hz ping trigger for initial tests
-	wire PingTrigger;
-	
+	wire PingTrigger;	
 	assign PingTrigger = 0;
 	
-	ClockDivider #(.Divisor (50_000_000 / 10))
- 			 U200 (.FastClock (Clock50MHz),  
-                   .Clear (1'b0),
-                   .SlowClock (),
-				 //.Pulse (PingTrigger)); // single pulse at SlowClock rate
-				   .Pulse ()); 
+	// ClockDivider #(.Divisor (50_000_000 / 10))
+ 			 // U200 (.FastClock (Clock50MHz),  
+                   // .Clear (1'b0),
+                   // .SlowClock (),
+			 	   // .Pulse (PingTrigger)); // single pulse at SlowClock rate
 
 	// stretch ping trigger for easier display
 	PulseStretcher U201 (.Clock50MHz (Clock50MHz),

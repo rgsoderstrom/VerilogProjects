@@ -84,6 +84,7 @@ module Sonar1Chan_Controller #(parameter ClearSampleBufferID = 'd100,
 	end
 	
 	always @ (*) begin
+//	always @ (posedge Clock50MHz) begin
 		SendRdyMsg    <= (state == SendReady);	
 		SendSampleMsg <= (state == Send);	
 		SampleMsgPrep <= (state == Prepare);

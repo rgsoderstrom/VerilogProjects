@@ -49,6 +49,7 @@ always @ (posedge Clock50MHz)
 		endcase
 	end
 	
+//always @ (posedge Clock50MHz)
 always @ (*)
 	begin
 	    WindowStart <= (State == SetWS);

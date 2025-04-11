@@ -43,7 +43,7 @@ module SonarADC1# (parameter RamAddrBits = 12)
                              
   //Mercury2_ADC_Sim 
     Mercury2_ADC 
-				U1 (.clock   (Clock50MHz),
+			   ADC (.clock   (Clock50MHz),
                     .trigger (ADC_Trigger),
                     .channel (3'b000),
                     .Dout    (Sample),   
@@ -60,13 +60,13 @@ module SonarADC1# (parameter RamAddrBits = 12)
 	assign      PaddedSample [15:10] = 6'b0;
 	
     Mux2 #(.Width (16))
-	   U2 (.in0    (16'h0),        // selected to write 0 to clear RAM
+	 Mux2 (.in0    (16'h0),        // selected to write 0 to clear RAM
            .in1    (PaddedSample),
  		   .select (DataMuxSel),
 	       .out    (SampleWriteData));
 	       
     DualPortRAM2 #(.AddrWidth (RamAddrBits)) 
-               U3 (.Clk (Clock50MHz),
+              RAM (.Clk (Clock50MHz),
 			   
                    .ByteClearAddr (ByteAddrClear), 
 
@@ -85,7 +85,7 @@ module SonarADC1# (parameter RamAddrBits = 12)
                    .WordRead      (1'b0));
                    
 	CounterUEC #(.Width (RamAddrBits + 1))
-            U4  (.Enable (IncrWriteAddr),
+      SampCntr  (.Enable (IncrWriteAddr),
 				 .Clr    (ClearWriteAddr),
                  .Clk    (Clock50MHz), 
 				 .AtZero (),
@@ -95,7 +95,8 @@ module SonarADC1# (parameter RamAddrBits = 12)
     assign SampleWriteAddr        = SampleCount [RamAddrBits-1:0];
     assign SampleWriteAddrWrapped = SampleCount [RamAddrBits] == 1;
 
-	SonarADC1_Controller U5 (.Clock50MHz (Clock50MHz),        
+	SonarADC1_Controller 
+			  	   Adc_Ctrl (.Clock50MHz (Clock50MHz),        
 				             .Clear (Clear),
 
     						 .SampleClockDivisor (SampleClockDivisor),

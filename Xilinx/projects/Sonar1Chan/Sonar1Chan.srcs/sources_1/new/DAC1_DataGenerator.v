@@ -79,7 +79,7 @@ module DAC1_DataGenerator #(parameter DacWidth = 10)
 //*********************************************************************		    
 		    		   
     RampCounter #(.Width (DacWidth))
-              U3 (.BlankingLevel (BlankingLevel),
+        RampCntr (.BlankingLevel (BlankingLevel),
                   .RampInitial   (RampStartingLevel),
                   .RampFinal     (RampStoppingLevel), 
                   .Clock        (Clock50MHz),

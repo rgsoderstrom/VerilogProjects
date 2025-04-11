@@ -28,7 +28,7 @@ module Sonar1Chan_Params #(parameter WW = 16) // WordWidth = 16 bits
     
 	// default values
 	localparam _SampleClockDivisor   = 50_000_000 / 100_000;
-	localparam _PingFrequency        = 10_050 / 190; //                                      *****   40_200 / 190;        // (FreqInHz / 190), see CORDIC.vhd
+	localparam _PingFrequency        = 40_200 / 190;        // (FreqInHz / 190), see CORDIC.vhd
 	localparam _PingDuration         = 0.001 * 50_000_000;  // in clocks, duration at max level                 
 	localparam _CountsPerVolt        = 1024 / 2.048;
 	localparam _BlankingLevel        = 0.025 * _CountsPerVolt; // = BlankingVoltage * CountsPerVolt;
@@ -105,6 +105,7 @@ module Sonar1Chan_Params #(parameter WW = 16) // WordWidth = 16 bits
 	end
 
 	always @(posedge Clock50MHz) begin
+	//always @(*) begin
 		if (state == Write) begin
 			case (ParamReadAddr)
 				0: SampleClockDivisor    <= ParamReadData;

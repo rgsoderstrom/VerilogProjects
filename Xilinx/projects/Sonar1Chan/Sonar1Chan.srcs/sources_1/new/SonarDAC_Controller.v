@@ -69,6 +69,7 @@ module SonarDAC_Controller (input wire  Clock50MHz,
 	end
 		
     always @ (*)
+    //always @ (posedge Clock50MHz)
 	    begin  
 		    BeginBlanking <= (State == setBB);
 		    BeginPing     <= (State == setBS);

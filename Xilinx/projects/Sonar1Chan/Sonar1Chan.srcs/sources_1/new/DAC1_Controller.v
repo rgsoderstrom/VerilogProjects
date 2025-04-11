@@ -58,6 +58,7 @@ module DAC1_Controller (input wire Clock,
 		end
 		
 	always @ (*)
+//	always @ (posedge Clock)
 		begin
 			LoadBlanking <= (State == SetLB);
 			dac_trigger  <= (State == LoadDAC1 || State == LoadDAC2);
