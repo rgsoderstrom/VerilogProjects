@@ -11,7 +11,7 @@ module DualPortRAM2 #(parameter AddrWidth = 10)
 					  
  					  // byte access
                       input wire      [7:0] ByteWriteData,
-                      output reg [7:0] ByteReadData,   // ByteReadData valid 3 clocks after ByteRead asserted
+                      output reg      [7:0] ByteReadData,   // ByteReadData valid 3 clocks after ByteRead asserted
                       input  wire           ByteWrite,
                       input  wire           ByteRead, 
                       input  wire           ByteClearAddr,
